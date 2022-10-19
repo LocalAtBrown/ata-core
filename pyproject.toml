@@ -1,0 +1,38 @@
+[tool.poetry]
+name = "ata-core"
+version = "0.1.0"
+description = "Core data processing functionality for automating the ask."
+authors = ["LocalNewsLab <mh3287@columbia.edu>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+[tool.poetry.dev-dependencies]
+mypy = "0.961"
+pre-commit = "2.19.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 122
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+  | cdk
+)/
+'''
+
+[tool.isort]
+profile = "black"
