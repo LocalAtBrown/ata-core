@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "ata-core"
+name = "ata-pipeline0"
 version = "0.1.0"
-description = "Core data processing functionality for automating the ask."
+description = "Snowplow to Redshift data processing."
 authors = ["LocalNewsLab <mh3287@columbia.edu>"]
 license = "MIT"
 

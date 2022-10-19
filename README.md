@@ -1,5 +1,5 @@
-# ata-core
-Core data processing functionality for automating the ask.
+# ata-pipeline0
+Snowplow to Redshift data processing.
 
 ## Development Tools
 
@@ -36,4 +36,3 @@ specified in the mypy.ini file.
 
 To update dependencies in your local environment, make changes to the `pyproject.toml` file then run `poetry update`.
 To update `requirements.txt` for the container, run `poetry export -o requirements.txt --without-hashes`.
-
