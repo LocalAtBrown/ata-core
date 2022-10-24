@@ -6,7 +6,7 @@ authors = ["LocalNewsLab <mh3287@columbia.edu>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.9"
 
 [tool.poetry.dev-dependencies]
 mypy = "0.961"
