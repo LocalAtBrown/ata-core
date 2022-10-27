@@ -1,4 +1,3 @@
-import logging
 import shutil
 import subprocess
 from datetime import datetime
@@ -80,10 +79,10 @@ def _fetch_folder(site_bucket_name: str, timestamp: datetime, path_to_data_dir: 
 
     command = f"aws s3 sync {uri_s3} {path_local}"
 
-    # TODO: Maybe it's worth configuring our own way of logging stuff, like this:
-    # https://github.com/LocalAtBrown/experiment-semantic-similarity/blob/main/notebooks/util/logging.py?
-    # Adding file name, function & line number of where the log happens might be useful
-    logging.info(f"Running this command in a separate processor: {command}")
+    # TODO: Once a global logging config is set, log the exact command to the console
+    # Would also be helpful to customize log message by adding file name, function & line
+    # number of where the log happens, kind of like this:
+    # https://github.com/LocalAtBrown/experiment-semantic-similarity/blob/main/notebooks/util/logging.py
 
     # Run the command
     return subprocess.Popen(command.split(" "), stdout=subprocess.DEVNULL)
