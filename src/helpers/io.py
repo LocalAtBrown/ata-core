@@ -15,7 +15,7 @@ def read_gzipped_json_records(path: Union[str, Path], fields: Optional[set[str]]
     with gzip.open(path, "rt") as f:
         # records is a queue instead of a list to make append operations faster
         # (refer to https://www.geeksforgeeks.org/deque-in-python/)
-        records = deque()
+        records: deque[dict] = deque()
 
         for line in f:
             record = json.loads(line)
