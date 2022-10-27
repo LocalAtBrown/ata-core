@@ -1,4 +1,5 @@
 import logging
+import shutil
 import subprocess
 from datetime import datetime
 from pathlib import Path
@@ -11,7 +12,11 @@ from src.helpers.io import read_gzipped_json_records
 
 
 def fetch_events(
-    site_bucket_name: str, timestamps: list[datetime], path_to_data_dir: str, num_processes: int
+    site_bucket_name: str,
+    timestamps: list[datetime],
+    path_to_data_dir: str,
+    num_processes: int,
+    delete_after_read: bool = True,
 ) -> Generator[pd.DataFrame, None, None]:
     """
     Given config inputs, including a site's bucket name and a list of date-hour
@@ -27,21 +32,29 @@ def fetch_events(
         if timestamp:
             processes[timestamp] = _fetch_folder(site_bucket_name, timestamp, path_to_data_dir)
 
-    for timestamp in timestamps:
+    for i, timestamp in enumerate(timestamps):
         # Wait for fetch to finish
         processes[timestamp].wait()
 
         # Start next fetch job in the queue
         timestamp_next = next(timestamps_to_download, None)
         if timestamp_next:
-            processes[timestamp_next] = _fetch_folder(site_bucket_name, timestamp, path_to_data_dir)
+            processes[timestamp_next] = _fetch_folder(site_bucket_name, timestamp_next, path_to_data_dir)
 
         # Read fetched data into a DataFrame
         df = _read_folder(site_bucket_name, timestamp, path_to_data_dir)
 
-        # TODO: Delete local data folder from disk
+        # Delete local data folder from disk
+        if delete_after_read:
+            if i == len(timestamps) - 1:
+                # Once reach the end of timestamp list, delete entire data directory
+                # containing all local folders to remove clutter
+                shutil.rmtree(path_to_data_dir)
+            else:
+                # Remove S3-downloaded folder we just read from
+                _delete_folder(site_bucket_name, timestamp, path_to_data_dir)
 
-        # Yield the fetched data for transformation
+        # Yield the fetched data for next step, i.e., transformation
         yield df
 
 
@@ -88,5 +101,13 @@ def _read_folder(site_bucket_name: str, timestamp: datetime, path_to_data_dir: s
     # within the local data folder, but using the latter for good measure
     dfs = [read_gzipped_json_records(path_file) for path_file in path_local.glob("**/*.gz")]
 
-    # Combine into a single DataFrame
-    return pd.concat(dfs)
+    # Combine into a single DataFrame. If there are no files, return an empty DataFrame
+    return pd.concat(dfs) if len(dfs) > 0 else pd.DataFrame()
+
+
+def _delete_folder(site_bucket_name: str, timestamp: datetime, path_to_data_dir: str) -> None:
+    """
+    Deletes an S3-fetched folder corresponding to the given site bucket name and date-hour timestamp.
+    """
+    path_local = Path(path_to_data_dir) / convert_to_s3_folder(timestamp)
+    shutil.rmtree(path_local)
