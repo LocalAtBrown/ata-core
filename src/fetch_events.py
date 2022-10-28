@@ -2,7 +2,7 @@ import shutil
 import subprocess
 from datetime import datetime
 from pathlib import Path
-from typing import Generator
+from typing import Generator, List, Union
 
 import pandas as pd
 
@@ -13,8 +13,8 @@ from src.helpers.io import read_gzipped_json_records
 
 def fetch_events(
     site_bucket_name: str,
-    timestamps: list[datetime],
-    path_to_data_dir: str,
+    timestamps: List[datetime],
+    path_to_data_dir: Union[str, Path],
     num_processes: int,
     delete_after_read: bool = True,
 ) -> Generator[pd.DataFrame, None, None]:
@@ -25,6 +25,8 @@ def fetch_events(
     """
     processes: dict[datetime, subprocess.Popen] = {}
     timestamps_to_download = iter(timestamps)
+    # Turn path_to_data_dir into a Path object if it's a string
+    path_to_data_dir = Path(path_to_data_dir)
 
     # Start fetching for the first num_processes timestamps
     for _ in range(num_processes):
@@ -67,14 +69,14 @@ def fetch_events(
         yield df
 
 
-def _fetch_folder(site_bucket_name: str, timestamp: datetime, path_to_data_dir: str) -> subprocess.Popen:
+def _fetch_folder(site_bucket_name: str, timestamp: datetime, path_to_data_dir: Path) -> subprocess.Popen:
     """
     Runs a command downloading an S3 folder of enriched Snowplow events in a site's
     bucket corresponding to a given date and hour.
     """
     timestamp_folder = convert_to_s3_folder(timestamp)
 
-    path_local = Path(path_to_data_dir) / timestamp_folder
+    path_local = path_to_data_dir / timestamp_folder
     # Create the path directory. It shouldn't have already existed because it's
     # deleted at the end of a job run, but setting exist_ok=True prevents error if
     # it already exists
@@ -98,13 +100,13 @@ def _fetch_folder(site_bucket_name: str, timestamp: datetime, path_to_data_dir: 
     return subprocess.Popen(command.split(" "), stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
 
 
-def _read_folder(site_bucket_name: str, timestamp: datetime, path_to_data_dir: str) -> pd.DataFrame:
+def _read_folder(site_bucket_name: str, timestamp: datetime, path_to_data_dir: Path) -> pd.DataFrame:
     """
     Opens all .gz files in a local data folder given its corresponding site bucket
     name and date-hour timestamp and combine all their data into a single pandas DataFrame.
     """
     # Local directory holding all data files fetched from the remote S3 folder
-    path_local = Path(path_to_data_dir) / convert_to_s3_folder(timestamp)
+    path_local = path_to_data_dir / convert_to_s3_folder(timestamp)
 
     # Probably only need *.gz instead of **/*.gz because there should be no directory
     # within the local data folder, but using the latter for good measure
@@ -119,9 +121,9 @@ def _read_folder(site_bucket_name: str, timestamp: datetime, path_to_data_dir: s
     return pd.concat(dfs)
 
 
-def _delete_folder(site_bucket_name: str, timestamp: datetime, path_to_data_dir: str) -> None:
+def _delete_folder(site_bucket_name: str, timestamp: datetime, path_to_data_dir: Path) -> None:
     """
     Deletes an S3-fetched folder corresponding to the given site bucket name and date-hour timestamp.
     """
-    path_local = Path(path_to_data_dir) / convert_to_s3_folder(timestamp)
+    path_local = path_to_data_dir / convert_to_s3_folder(timestamp)
     shutil.rmtree(path_local)

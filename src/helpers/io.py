@@ -2,12 +2,12 @@ import gzip
 import json
 from collections import deque
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional, Set, Union
 
 import pandas as pd
 
 
-def read_gzipped_json_records(path: Union[str, Path], fields: Optional[set[str]] = None) -> pd.DataFrame:
+def read_gzipped_json_records(path: Union[str, Path], fields: Optional[Set[str]] = None) -> pd.DataFrame:
     """
     Reads gzipped file of json records as rows, e.g., in a Snowplow event file, into a pandas DataFrame.
     This is faster and less error-prone than using pandas to open Snowplow .gz files directly.
