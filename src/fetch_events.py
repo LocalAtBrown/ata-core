@@ -110,8 +110,13 @@ def _read_folder(site_bucket_name: str, timestamp: datetime, path_to_data_dir: s
     # within the local data folder, but using the latter for good measure
     dfs = [read_gzipped_json_records(path_file) for path_file in path_local.glob("**/*.gz")]
 
-    # Combine into a single DataFrame. If there are no files, return an empty DataFrame
-    return pd.concat(dfs) if len(dfs) > 0 else pd.DataFrame()
+    # If there are no files/DataFrames, return an empty DataFrame, since pd.concat([]) throws an error
+    if len(dfs) == 0:
+        # TODO: logging.info showing no data available to fetch for this particular date-hour timestamp
+        return pd.DataFrame()
+
+    # Combine into a single DataFrame
+    return pd.concat(dfs)
 
 
 def _delete_folder(site_bucket_name: str, timestamp: datetime, path_to_data_dir: str) -> None:
