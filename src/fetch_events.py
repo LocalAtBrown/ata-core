@@ -21,7 +21,8 @@ def fetch_events(
     """
     Given config inputs, including a site's bucket name and a list of date-hour
     timestamps, fetches corresponding S3 Snowplow event files and returns them
-    as a generator of pandas DataFrames, each corresponding to one timestamp.
+    as a generator of pandas DataFrames (instead of a list, which uses more memory),
+    each corresponding to one timestamp.
     """
     processes: dict[datetime, subprocess.Popen] = {}
     timestamps_to_download = iter(timestamps)
@@ -34,6 +35,7 @@ def fetch_events(
         if timestamp:
             processes[timestamp] = _fetch_folder(site_bucket_name, timestamp, path_to_data_dir)
 
+    # As soon as a process finishes and is freed up, save its data into a DataFrame and fetch the next timestamp
     for i, timestamp in enumerate(timestamps):
         process = processes[timestamp]
         # Wait for fetch to finish using Popen.communicate
