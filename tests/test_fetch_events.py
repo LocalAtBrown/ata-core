@@ -40,7 +40,7 @@ def timestamps_multi() -> List[datetime]:
 
 
 # ---------- TESTS ----------
-def test_single_ts_empty(site_bucket_name, timestamps_single_empty, tmp_path) -> None:
+def test_single_ts_empty(site_bucket_name, timestamps_single_empty, tmp_path):
     """
     1 timestamp pointing to a nonexistent S3 folder, 1 process
     """
