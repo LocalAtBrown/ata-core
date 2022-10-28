@@ -88,7 +88,7 @@ def _fetch_folder(site_bucket_name: str, timestamp: datetime, path_to_data_dir: 
 
     # Probably fine to put the "enriched/good" string here since we're only using enriched data,
     # it can be passed to as a function parameter if needed
-    # TODO: When Site is a full-fledged class, probably still worth passing just a bucket name,
+    # TODO: If Site is a full-fledged class, probably still worth passing just a bucket name,
     # e.g., site_bucket_name = Site.s3_bucket_name instead of passing the entire Site instance
     path_s3 = Path(site_bucket_name) / "enriched/good" / timestamp_folder
     uri_s3 = f"s3://{path_s3}"
