@@ -38,6 +38,7 @@ def fetch_events(
     # As soon as a process finishes and is freed up, save its data into a DataFrame and fetch the next timestamp
     for i, timestamp in enumerate(timestamps):
         process = processes[timestamp]
+
         # Wait for fetch to finish using Popen.communicate
         _, process_error_message = process.communicate()
         # Raise exception if return code is not 0, indicating an error happened
