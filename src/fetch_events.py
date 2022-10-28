@@ -21,8 +21,8 @@ def fetch_events(
     """
     Given config inputs, including a site's bucket name and a list of date-hour
     timestamps, fetches corresponding S3 Snowplow event files and returns them
-    as a generator of pandas DataFrames (instead of a list, which uses more memory),
-    each corresponding to one timestamp.
+    as a generator of pandas DataFrames (instead of a list of DataFrames,
+    which uses more memory), each corresponding to one timestamp.
     """
     processes: dict[datetime, subprocess.Popen] = {}
     timestamps_to_download = iter(timestamps)
