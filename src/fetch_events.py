@@ -7,6 +7,7 @@ from typing import Generator
 import pandas as pd
 
 from src.helpers.datetime import convert_to_s3_folder
+from src.helpers.exceptions import EventFetchError
 from src.helpers.io import read_gzipped_json_records
 
 
@@ -32,8 +33,17 @@ def fetch_events(
             processes[timestamp] = _fetch_folder(site_bucket_name, timestamp, path_to_data_dir)
 
     for i, timestamp in enumerate(timestamps):
-        # Wait for fetch to finish
-        processes[timestamp].wait()
+        process = processes[timestamp]
+        # Wait for fetch to finish using Popen.communicate
+        _, process_error_message = process.communicate()
+        # Raise exception if return code is not 0, indicating an error happened
+        process_return_code = process.returncode
+        if process_return_code != 0:
+            raise EventFetchError(
+                f"Subprocess command failed with return code {process_return_code}. "
+                + f"MESSAGE: {process_error_message.decode('utf-8').strip()}. "
+                + f"COMMAND: {' '.join(process.args)}."
+            )
 
         # Start next fetch job in the queue
         timestamp_next = next(timestamps_to_download, None)
@@ -85,7 +95,7 @@ def _fetch_folder(site_bucket_name: str, timestamp: datetime, path_to_data_dir: 
     # https://github.com/LocalAtBrown/experiment-semantic-similarity/blob/main/notebooks/util/logging.py
 
     # Run the command
-    return subprocess.Popen(command.split(" "), stdout=subprocess.DEVNULL)
+    return subprocess.Popen(command.split(" "), stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
 
 
 def _read_folder(site_bucket_name: str, timestamp: datetime, path_to_data_dir: str) -> pd.DataFrame:
