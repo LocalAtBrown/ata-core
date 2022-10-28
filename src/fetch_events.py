@@ -2,7 +2,7 @@ import shutil
 import subprocess
 from datetime import datetime
 from pathlib import Path
-from typing import Generator, List, Union
+from typing import Generator, List, Union, cast
 
 import pandas as pd
 
@@ -42,11 +42,12 @@ def fetch_events(
         _, process_error_message = process.communicate()
         # Raise exception if return code is not 0, indicating an error happened
         process_return_code = process.returncode
+        process_args = cast(List[str], process.args)  # to appease mypy
         if process_return_code != 0:
             raise EventFetchError(
                 f"Subprocess command failed with return code {process_return_code}. "
                 + f"MESSAGE: {process_error_message.decode('utf-8').strip()}. "
-                + f"COMMAND: {' '.join(process.args)}."
+                + f"COMMAND: {' '.join(process_args)}."
             )
 
         # Start next fetch job in the queue
