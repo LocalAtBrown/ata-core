@@ -1,7 +1,7 @@
 FROM python:3.9.15-slim as req
 COPY pyproject.toml .
 COPY poetry.lock .
-RUN pip install poetry && poetry export -o requirements.txt
+RUN pip install poetry && poetry export --without-hashes -o requirements.txt
 
 FROM python:3.9.15-slim as builder
 # install building necessities here with apt-get install, e.g. apt-get update && apt-get install gcc (if needed)
