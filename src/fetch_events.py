@@ -37,9 +37,13 @@ def fetch_events(
     ]
     object_summaries = itertools.chain(*object_summaries_by_timestamp)
 
-    # Spread fetching tasks over a number of CPU threads. Until aioboto3 is thoroughly documented and isn't a pain
-    # to work with (or until boto3 is asyncio-friendly), multithreading is a decent alternative
-    # Fetching all data (even gzipped) from the get-go might incur significant memory footprint, but this is a simple start
+    # Spread fetching tasks over a number of CPU threads. Until aioboto3 is
+    # thoroughly documented and isn't a pain to work with (or until boto3
+    # is asyncio-friendly), multithreading is a decent alternative and much
+    # (2x, using max_workers=os.cpu_count() + 4) faster than sequential fetching
+    #
+    # Fetching all data (even gzipped) from the get-go might incur significant
+    # memory footprint, but this is a simple start
     with ThreadPoolExecutor(max_workers=num_concurrent_downloads) as executor:
         dfs = executor.map(_fetch_decompress_parse, object_summaries)
 
@@ -65,6 +69,7 @@ def _fetch_object(object_summary: ObjectSummary) -> Tuple[str, GetObjectOutputTy
 def _decompress_object(object_key: str, object_response: GetObjectOutputTypeDef) -> bytes:
     try:
         data = object_response["Body"].read()
+        # Assuming all objects are .gz files
         data = gzip.decompress(data)
     except Exception as e:
         raise EventObjectDecompressError(f"Failed to decompress/unzip object {object_key}") from e
