@@ -3,17 +3,11 @@ import itertools
 import json
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
-from typing import List, Tuple
+from typing import List
 
 import pandas as pd
 from mypy_boto3_s3.service_resource import ObjectSummary, S3ServiceResource
 from mypy_boto3_s3.type_defs import GetObjectOutputTypeDef
-
-from src.helpers.exceptions import (
-    EventObjectDecompressError,
-    EventObjectFetchError,
-    EventObjectParseError,
-)
 
 
 def fetch_events(
@@ -51,35 +45,24 @@ def fetch_events(
 
 
 def _fetch_decompress_parse(object_summary: ObjectSummary) -> pd.DataFrame:
-    key, response = _fetch_object(object_summary)
-    data = _decompress_object(key, response)
-    df = _parse_object(key, data)
+    response = _fetch_object(object_summary)
+    data = _decompress_object(response)
+    df = _parse_object(data)
     return df
 
 
-def _fetch_object(object_summary: ObjectSummary) -> Tuple[str, GetObjectOutputTypeDef]:
-    key = object_summary.key
-    try:
-        response = object_summary.get()
-    except Exception as e:
-        raise EventObjectFetchError(f"Failed to fetch object {object_summary.key}") from e
-    return key, response
+def _fetch_object(object_summary: ObjectSummary) -> GetObjectOutputTypeDef:
+    return object_summary.get()
 
 
-def _decompress_object(object_key: str, object_response: GetObjectOutputTypeDef) -> bytes:
-    try:
-        data = object_response["Body"].read()
-        # Assuming all objects are .gz files
-        data = gzip.decompress(data)
-    except Exception as e:
-        raise EventObjectDecompressError(f"Failed to decompress/unzip object {object_key}") from e
+def _decompress_object(object_response: GetObjectOutputTypeDef) -> bytes:
+    data = object_response["Body"].read()
+    # Assuming all objects are .gz files
+    data = gzip.decompress(data)
     return data
 
 
-def _parse_object(object_key: str, object_data: bytes) -> pd.DataFrame:
-    try:
-        data = object_data.decode("utf-8").strip().split("\n")
-        data = [json.loads(row) for row in data]
-    except Exception as e:
-        raise EventObjectParseError(f"Failed to parse object {object_key} into a DataFrame") from e
+def _parse_object(object_data: bytes) -> pd.DataFrame:
+    data = object_data.decode("utf-8").strip().split("\n")
+    data = [json.loads(row) for row in data]
     return pd.DataFrame.from_records(data)
