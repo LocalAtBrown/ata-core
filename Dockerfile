@@ -11,5 +11,5 @@ RUN pip install --user -r requirements.txt
 FROM python:3.9.15-slim as runner
 # install running necessities here with apt-get install, e.g. apt-get update && apt-get install libpq-dev (if needed)
 COPY --from=builder /root/.local /root/.local
-COPY . /etl/
+COPY . /src/
 ENV PATH=/root/.local/bin:$PATH
