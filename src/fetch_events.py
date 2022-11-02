@@ -9,7 +9,6 @@ import pandas as pd
 from mypy_boto3_s3.service_resource import ObjectSummary, S3ServiceResource
 from mypy_boto3_s3.type_defs import GetObjectOutputTypeDef
 
-from src.helpers.datetime import convert_to_s3_folder
 from src.helpers.exceptions import (
     EventObjectDecompressError,
     EventObjectFetchError,
@@ -34,7 +33,7 @@ def fetch_events(
 
     # Get a list of summaries of S3 objects to fetch
     object_summaries_by_timestamp = [
-        bucket.objects.filter(Prefix=f"enriched/good/{convert_to_s3_folder(ts)}") for ts in timestamps
+        bucket.objects.filter(Prefix=f"enriched/good/{ts.strftime('%Y/%m/%d/%H')}") for ts in timestamps
     ]
     object_summaries = itertools.chain(*object_summaries_by_timestamp)
 

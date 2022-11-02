@@ -20,6 +20,8 @@ class EventObjectParseError(Exception):
     Custom exception upon failure while parsing the contents of an S3 object.
     """
 
+    pass
+
 
 # Snowplow transformation
 
