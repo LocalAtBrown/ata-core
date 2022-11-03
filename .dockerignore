@@ -1,6 +1,7 @@
 tests
 Dockerfile
 README.md
+LICENSE
 tox.ini
 .dockerignore
 .git
