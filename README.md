@@ -1,6 +1,9 @@
 # ata-pipeline0
 Snowplow to Redshift data processing.
 
+## Use
+TODO, don't have a main path to execute yet.
+
 ## Development Tools
 
 We use [Poetry](https://python-poetry.org/) to manage dependencies. It also helps with pinning dependency and python
@@ -40,3 +43,22 @@ To update dependencies in your local environment, make changes to the `pyproject
 
 We use [pytest](https://docs.pytest.org) to run our tests. Simply run `pytest tests` or a specific
 directory/file/module to run tests.
+We run continuous integration (CI) via GitHub actions. We have actions to run MyPy and run the tests.
+
+## Deployment
+
+Deployment for the Local News Lab (LNL) is handled via AWS CodePipeline, defined elsewhere in the ata-infrastructure repo.
+We use Docker to containerize our code. The LNL deploys this project on AWS Lambda.
+
+### Docker
+
+The `Dockerfile` in the root of the project is the correct target for building.
+
+To build locally: `docker build -t {desired-name-and-tag} .`. For example: `docker build -t lnl/ata-p0:latest .`
+Don't forget the `.` at the end to reference the `Dockerfile` in the current directory (assuming you run the command
+from the root of the project).
+
+To run the Docker image locally: `docker run -it --rm {name-and-tag} {command}`. For example: `docker run -it --rm
+lnl/ata-p0:latest bash`
+
+Note that the code is structured so that you can run it either as a Docker container or directly on your machine/IDE.

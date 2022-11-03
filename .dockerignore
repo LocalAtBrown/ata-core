@@ -1,0 +1,13 @@
+tests
+Dockerfile
+README.md
+LICENSE
+tox.ini
+.dockerignore
+.git
+.github
+.gitignore
+.idea
+.mypy_cache
+.pytest_cache
+.pre-commit-config.yaml
