@@ -1,4 +1,7 @@
 from enum import Enum
+from typing import Dict, Set
+
+import pandas as pd
 
 
 class EventFields(Enum):
@@ -60,3 +63,20 @@ class EventFields(Enum):
 
     # Raw useragent
     USERAGENT = "useragent"
+
+
+def delete_rows(df: pd.DataFrame, fields_required: Set[EventFields]) -> pd.DataFrame:
+    df = df.dropna(subset=[field.value for field in fields_required])
+    df = df.drop_duplicates()
+
+
+def transform_fields(df: pd.DataFrame) -> pd.DataFrame:
+    return df
+
+
+def add_fields(df: pd.DataFrame) -> pd.DataFrame:
+    return df
+
+
+def split_into_tables(df: pd.DataFrame) -> Dict[str, pd.DataFrame]:
+    return {"hi": df}
