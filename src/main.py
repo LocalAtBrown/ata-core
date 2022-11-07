@@ -1,8 +1,7 @@
-def my_fn(x: int, y: int) -> int:
-    return x + y
+import json
 
 
-if __name__ == "__main__":
-    a = 2
-    b = 3
-    print(f"Hello, World! The sum of {a} and {b} is {my_fn(a, b)}")
+def handler(event, context):
+    # Note: this is invoked by an event-driven, async method (s3 trigger) so the return value is discarded
+    print("request: {}".format(json.dumps(event)))
+    return {"hi": "there"}

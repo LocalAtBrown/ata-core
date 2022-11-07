@@ -1,8 +1,25 @@
 # ata-pipeline0
 Snowplow to Redshift data processing.
 
-## Use
-TODO, don't have a main path to execute yet.
+## Run
+
+Since this code is containerized to run on Lambda, the main entrypoint isn't quite designed to run locally.
+However, we can build the Docker image and run it locally, then ping it to try it out locally. We can, of course,
+still test all the functions used by the main handler and run those separately (e.g. in a scratch file) if so desired.
+
+### Docker
+
+The `Dockerfile` in the root of the project is the correct target for building.
+
+To build locally: `docker build -t {desired-name-and-tag} .`. For example: `docker build -t lnl/ata-p0:latest .`
+Don't forget the `.` at the end to reference the `Dockerfile` in the current directory (assuming you run the command
+from the root of the project).
+
+To run the Docker image locally (with the Lambda set up):
+`docker run --rm -p {local_port}:{container_port} {name-and-tag} {command}`.
+For example: `docker run --rm -p 9000:8080 lnl/ata-p0:latest`. This will serve it on `localhost:9000`. To ping
+the handler (and confirm it works), you can then make an HTTP request to it. For example:
+`curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{"field1":"b", "field2":"a"}'`
 
 ## Development Tools
 
@@ -49,16 +66,3 @@ We run continuous integration (CI) via GitHub actions. We have actions to run My
 
 Deployment for the Local News Lab (LNL) is handled via AWS CodePipeline, defined elsewhere in the ata-infrastructure repo.
 We use Docker to containerize our code. The LNL deploys this project on AWS Lambda.
-
-### Docker
-
-The `Dockerfile` in the root of the project is the correct target for building.
-
-To build locally: `docker build -t {desired-name-and-tag} .`. For example: `docker build -t lnl/ata-p0:latest .`
-Don't forget the `.` at the end to reference the `Dockerfile` in the current directory (assuming you run the command
-from the root of the project).
-
-To run the Docker image locally: `docker run -it --rm {name-and-tag} {command}`. For example: `docker run -it --rm
-lnl/ata-p0:latest bash`
-
-Note that the code is structured so that you can run it either as a Docker container or directly on your machine/IDE.
