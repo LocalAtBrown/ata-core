@@ -98,7 +98,7 @@ def convert_field_types(
     fields_categorical: Set[EventFields],
 ) -> pd.DataFrame:
     """
-    Change data types in a Snowplow events DataFrame to those desired.
+    Changes data types in a Snowplow events DataFrame to those desired.
     """
     # Make a copy of the original so that it's not affected, but can remove
     # this if memory is an issue
