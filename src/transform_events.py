@@ -52,15 +52,18 @@ class EventFields(Enum):
 
     # [STR (JSON)] Data/attributes of HTML input and its form in JSON format. Only present if event_name == "change_form"
     # (read: https://github.com/snowplow/iglu-central/blob/master/schemas/com.snowplowanalytics.snowplow/change_form/jsonschema/1-0-0)
-    UNSTRUCT_FORM_CHANGE = "unstruct_event_com_snowplowanalytics_snowplow_change_form_1"
+    # Can be loaded into Redshift as-is since Redshift allows inserting and querying with semistructured data
+    SEMISTRUCT_FORM_CHANGE = "unstruct_event_com_snowplowanalytics_snowplow_change_form_1"
 
     # [STR (JSON)] Data/attributes of HTML input and its form in JSON format. Only present if event_name == "focus_form"
     # (read: https://github.com/snowplow/iglu-central/blob/master/schemas/com.snowplowanalytics.snowplow/focus_form/jsonschema/1-0-0)
-    UNSTRUCT_FORM_FOCUS = "unstruct_event_com_snowplowanalytics_snowplow_focus_form_1"
+    # Can be loaded into Redshift as-is since Redshift allows inserting and querying with semistructured data
+    SEMISTRUCT_FORM_FOCUS = "unstruct_event_com_snowplowanalytics_snowplow_focus_form_1"
 
     # [STR (JSON)] Data/attributes of HTML form and all its inputs in JSON format. Only present if event_name == "submit_form"
     # (read: https://github.com/snowplow/iglu-central/blob/master/schemas/com.snowplowanalytics.snowplow/submit_form/jsonschema/1-0-0)
-    UNSTRUCT_FORM_SUBMIT = "unstruct_event_com_snowplowanalytics_snowplow_submit_form_1"
+    # Can be loaded into Redshift as-is since Redshift allows inserting and querying with semistructured data
+    SEMISTRUCT_FORM_SUBMIT = "unstruct_event_com_snowplowanalytics_snowplow_submit_form_1"
 
     # [STR] Raw useragent
     USERAGENT = "useragent"
@@ -93,7 +96,8 @@ def transform_fields(
     """
     Performs transformations (not including aggregation) on a Snowplow events DataFrame.
     """
-    df = df.copy()  # To protect original DataFrame's integrity, but can be removed if memory footprint is an issue
+    # To protect original DataFrame's integrity, but can be removed if memory footprint is an issue
+    df = df.copy()
 
     fields_int = [f.value for f in fields_int]
     fields_float = [f.value for f in fields_float]
