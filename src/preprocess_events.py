@@ -134,7 +134,8 @@ def _convert_field_types(
 
     df[fields_int] = df[fields_int].astype(int)
     df[fields_float] = df[fields_float].astype(float)
-    # pd.to_datetime can only turn pandas Series to datetime
+    # pd.to_datetime can only turn pandas Series to datetime, so need to convert
+    # one Series/column at a time
     for field in fields_datetime:
         df[field] = pd.to_datetime(df[field])
     df[fields_categorical] = df[fields_categorical].astype("category")
