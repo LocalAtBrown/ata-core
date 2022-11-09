@@ -65,4 +65,5 @@ def _decompress_object(object_response: GetObjectOutputTypeDef) -> bytes:
 def _parse_object(object_data: bytes) -> pd.DataFrame:
     data = object_data.decode("utf-8").strip().split("\n")
     data = [json.loads(row) for row in data]
-    return pd.DataFrame.from_records(data)
+    # Setting everything as str because we'll typecast by ourselves later
+    return pd.DataFrame(data, dtype=str)

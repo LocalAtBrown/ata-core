@@ -80,7 +80,7 @@ def delete_rows_and_fields(
     # Remove duplicate rows
     df = df.drop_duplicates()
 
-    # TODO: Maybe do something to weed out form events whose unstruct data, e.g., the HTML form class name, says it's not a newsletter form?
+    return df
 
 
 def transform_fields(
@@ -108,11 +108,3 @@ def transform_fields(
     df[fields_categorical] = df[fields_categorical].astype("category")
 
     return df
-
-
-# def add_fields(df: pd.DataFrame) -> pd.DataFrame:
-#     return df
-
-
-# def split_into_tables(df: pd.DataFrame) -> Dict[str, pd.DataFrame]:
-#     return {"hi": df}
