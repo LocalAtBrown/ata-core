@@ -90,7 +90,7 @@ def delete_rows_and_fields(
     return df
 
 
-def change_field_types(
+def convert_field_types(
     df: pd.DataFrame,
     fields_int: Set[EventFields],
     fields_float: Set[EventFields],
