@@ -82,6 +82,7 @@ def preprocess_events(
     """
     Main Snowplow events DataFrame preprocessing function.
     """
+    # TODO: After each step, if applicable, log how many rows or fields were deleted
     df = _delete_fields(df, fields_to_keep)
     df = _delete_rows_duplicate_key(df, field_primary_key)
     df = _delete_rows_empty(df, fields_required)
