@@ -87,6 +87,13 @@ def _delete_rows_empty(df: pd.DataFrame, fields_required: Set[Field]) -> pd.Data
     return df.dropna(subset=[f.value for f in fields_required])
 
 
+def _delete_rows_duplicate_key(df: pd.DataFrame, field_primary_key: Field) -> pd.DataFrame:
+    """
+    Delete all rows whose primary key is repeated in the DataFrame.
+    """
+    return df.drop_duplicates(subset=[field_primary_key.value])
+
+
 def _convert_field_types(
     df: pd.DataFrame,
     fields_int: Set[Field],
