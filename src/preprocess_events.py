@@ -55,17 +55,14 @@ class Field(Enum):
 
     # [STR (JSON)] Data/attributes of HTML input and its form in JSON format. Only present if event_name == "change_form"
     # (read: https://github.com/snowplow/iglu-central/blob/master/schemas/com.snowplowanalytics.snowplow/change_form/jsonschema/1-0-0)
-    # Can be loaded into Redshift as-is since Redshift allows inserting and querying with semistructured data
     SEMISTRUCT_FORM_CHANGE = "unstruct_event_com_snowplowanalytics_snowplow_change_form_1"
 
     # [STR (JSON)] Data/attributes of HTML input and its form in JSON format. Only present if event_name == "focus_form"
     # (read: https://github.com/snowplow/iglu-central/blob/master/schemas/com.snowplowanalytics.snowplow/focus_form/jsonschema/1-0-0)
-    # Can be loaded into Redshift as-is since Redshift allows inserting and querying with semistructured data
     SEMISTRUCT_FORM_FOCUS = "unstruct_event_com_snowplowanalytics_snowplow_focus_form_1"
 
     # [STR (JSON)] Data/attributes of HTML form and all its inputs in JSON format. Only present if event_name == "submit_form"
     # (read: https://github.com/snowplow/iglu-central/blob/master/schemas/com.snowplowanalytics.snowplow/submit_form/jsonschema/1-0-0)
-    # Can be loaded into Redshift as-is since Redshift allows inserting and querying with semistructured data
     SEMISTRUCT_FORM_SUBMIT = "unstruct_event_com_snowplowanalytics_snowplow_submit_form_1"
 
     # [STR] Raw useragent
