@@ -19,7 +19,7 @@ class EventFields(Enum):
     # [INT] Number of the current user session, e.g. first session is 1, next session is 2, etc. Dependent on domain_userid
     DOMAIN_SESSIONIDX = "domain_sessionidx"
 
-    # [STR, CATEGORICAL if needed] User ID set by Snowplow using 1st party cookie. Our primary identification key
+    # [STR, CATEGORICAL if needed] User ID set by Snowplow using 1st party cookie
     DOMAIN_USERID = "domain_userid"
 
     # [FLOAT] Screen height in pixels. Almost 1-to-1 relationship with domain_userid (there are exceptions)
@@ -27,6 +27,9 @@ class EventFields(Enum):
 
     # [FLOAT] Screen width in pixels. Almost 1-to-1 relationship with domain_userid (there are exceptions)
     DVCE_SCREENWIDTH = "dvce_screenwidth"
+
+    # [STR] ID of event
+    EVENT_ID = "event_id"
 
     # [STR, CATEGORICAL] Name of event. Can be "page_view", "page_ping", "focus_form", "change_form", "submit_form"
     EVENT_NAME = "event_name"
@@ -80,8 +83,8 @@ def delete_rows_and_fields(
     # Some fields, e.g., derived_tstamp, shouldn't be empty under any circumstance,
     # so we drop rows where these fields are empty
     df = df.dropna(subset=[f.value for f in fields_required])
-    # Remove duplicate rows
-    df = df.drop_duplicates()
+    # Remove duplicate rows. TODO: Comment out until finish dealing with duplicated event_ids
+    # df = df.drop_duplicates()
 
     return df
 
