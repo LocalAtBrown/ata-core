@@ -4,7 +4,7 @@ from typing import Set
 import pandas as pd
 
 
-class EventFields(Enum):
+class Field(Enum):
     """
     Enum for Snowplow fields of interest.
     Snowplow documentation of these fields can be found here: https://docs.snowplow.io/docs/understanding-your-pipeline/canonical-event/.
@@ -72,30 +72,27 @@ class EventFields(Enum):
     USERAGENT = "useragent"
 
 
-def delete_rows_and_fields(
-    df: pd.DataFrame, fields_to_keep: Set[EventFields], fields_required: Set[EventFields]
-) -> pd.DataFrame:
+def _delete_fields(df: pd.DataFrame, fields_to_keep: Set[Field]) -> pd.DataFrame:
     """
-    Cleans Snowplow events DataFrame.
+    Remove unncessary fields from an events DataFrame.
     """
-    # Remove unncessary fields
-    df = df[[f.value for f in fields_to_keep]]
-    # Some fields, e.g., derived_tstamp, shouldn't be empty under any circumstance,
-    # so we drop rows where these fields are empty
-    df = df.dropna(subset=[f.value for f in fields_required])
-    # TODO: Log how many rows were dropped with df.dropna
-    # Remove duplicate rows. TODO: Comment out until finish dealing with duplicated event_ids
-    # df = df.drop_duplicates()
-
-    return df
+    return df[[f.value for f in fields_to_keep]]
 
 
-def convert_field_types(
+def _delete_rows_empty(df: pd.DataFrame, fields_required: Set[Field]) -> pd.DataFrame:
+    """
+    Given a list of fields that cannot have empty or null data, remove all rows
+    with null values in any of these fields.
+    """
+    return df.dropna(subset=[f.value for f in fields_required])
+
+
+def _convert_field_types(
     df: pd.DataFrame,
-    fields_int: Set[EventFields],
-    fields_float: Set[EventFields],
-    fields_datetime: Set[EventFields],
-    fields_categorical: Set[EventFields],
+    fields_int: Set[Field],
+    fields_float: Set[Field],
+    fields_datetime: Set[Field],
+    fields_categorical: Set[Field],
 ) -> pd.DataFrame:
     """
     Changes data types in a Snowplow events DataFrame to those desired.
