@@ -94,7 +94,7 @@ def change_field_types(
     fields_categorical: Set[EventFields],
 ) -> pd.DataFrame:
     """
-    Performs transformations (not including aggregation) on a Snowplow events DataFrame.
+    Change data types in a Snowplow events DataFrame to those desired.
     """
     # To protect original DataFrame's integrity, but can be removed if memory footprint is an issue
     df = df.copy()
