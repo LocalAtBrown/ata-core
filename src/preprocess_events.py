@@ -28,7 +28,7 @@ class Field(Enum):
     # [FLOAT] Screen width in pixels. Almost 1-to-1 relationship with domain_userid (there are exceptions)
     DVCE_SCREENWIDTH = "dvce_screenwidth"
 
-    # [STR] ID of event. Ideally, this would be the primary key.
+    # [STR] ID of event. Ideally, this would be the primary key within the site DataFrame
     EVENT_ID = "event_id"
 
     # [STR, CATEGORICAL] Name of event. Can be "page_view", "page_ping", "focus_form", "change_form", "submit_form"
@@ -67,6 +67,27 @@ class Field(Enum):
 
     # [STR] Raw useragent
     USERAGENT = "useragent"
+
+
+def preprocess_events(
+    df: pd.DataFrame,
+    fields_to_keep: Set[Field],
+    fields_required: Set[Field],
+    field_primary_key: Field,
+    fields_int: Set[Field],
+    fields_float: Set[Field],
+    fields_datetime: Set[Field],
+    fields_categorical: Set[Field],
+) -> pd.DataFrame:
+    """
+    Main Snowplow events DataFrame preprocessing function.
+    """
+    df = _delete_fields(df, fields_to_keep)
+    df = _delete_rows_duplicate_key(df, field_primary_key)
+    df = _delete_rows_empty(df, fields_required)
+    df = _convert_field_types(df, fields_int, fields_float, fields_datetime, fields_categorical)
+
+    return df
 
 
 def _delete_fields(df: pd.DataFrame, fields_to_keep: Set[Field]) -> pd.DataFrame:
