@@ -96,7 +96,8 @@ def change_field_types(
     """
     Change data types in a Snowplow events DataFrame to those desired.
     """
-    # To protect original DataFrame's integrity, but can be removed if memory footprint is an issue
+    # Make a copy of the original so that it's not affected, but can remove
+    # this if memory is an issue
     df = df.copy()
 
     fields_int = [f.value for f in fields_int]
