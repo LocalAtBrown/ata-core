@@ -136,8 +136,10 @@ def _convert_field_types(
     df[fields_float_list] = df[fields_float_list].astype(float)
     # pd.to_datetime can only turn pandas Series to datetime, so need to convert
     # one Series/column at a time
+    # All timestamps should already be in UTC: https://discourse.snowplow.io/t/what-timezones-are-the-timestamps-set-in/622,
+    # but setting utc=True just to be safe
     for field in fields_datetime_list:
-        df[field] = pd.to_datetime(df[field])
+        df[field] = pd.to_datetime(df[field], utc=True)
     df[fields_categorical_list] = df[fields_categorical_list].astype("category")
 
     return df
