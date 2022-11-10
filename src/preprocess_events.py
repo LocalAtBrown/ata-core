@@ -127,17 +127,17 @@ def _convert_field_types(
     # this if memory is an issue
     df = df.copy()
 
-    fields_int = [f.value for f in fields_int]
-    fields_float = [f.value for f in fields_float]
-    fields_datetime = [f.value for f in fields_datetime]
-    fields_categorical = [f.value for f in fields_categorical]
+    fields_int_list = [f.value for f in fields_int]
+    fields_float_list = [f.value for f in fields_float]
+    fields_datetime_list = [f.value for f in fields_datetime]
+    fields_categorical_list = [f.value for f in fields_categorical]
 
-    df[fields_int] = df[fields_int].astype(int)
-    df[fields_float] = df[fields_float].astype(float)
+    df[fields_int_list] = df[fields_int_list].astype(int)
+    df[fields_float_list] = df[fields_float_list].astype(float)
     # pd.to_datetime can only turn pandas Series to datetime, so need to convert
     # one Series/column at a time
-    for field in fields_datetime:
+    for field in fields_datetime_list:
         df[field] = pd.to_datetime(df[field])
-    df[fields_categorical] = df[fields_categorical].astype("category")
+    df[fields_categorical_list] = df[fields_categorical_list].astype("category")
 
     return df
