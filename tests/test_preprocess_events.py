@@ -29,7 +29,8 @@ def df() -> pd.DataFrame:
     return pd.DataFrame(
         [
             ["A0", "1", "1500", None, "2022-11-01T00:00:01.051Z", "page_ping"],
-            ["A0", "1", None, "400", "2022-11-01T00:00:01.051Z", "submit_form"],
+            ["A0", "1", None, "400", "2022-11-02T00:00:01.051Z", "submit_form"],
+            ["B1", "2", "2000", "200", "2022-12-01T00:00:01.051Z", "focus_form"],
             ["C2", "1", "1500", "400", None, None],
         ],
         columns=[
@@ -87,13 +88,18 @@ def test__delete_fields(df, fields_to_keep) -> None:
 def test__delete_rows_empty(df, fields_required) -> None:
     df = _delete_rows_empty(df, fields_required)
     # doc_height is not required, so the first row is off the hook
-    assert df.shape[0] == 1
+    assert df.shape[0] == 2
+    # isna() should return False for all cells under required fields;
+    # these false values sum up to 0
+    assert df[[f.value for f in fields_required]].isna().to_numpy().sum() == 0
 
 
 def test__delete_rows_duplicate_key(df, field_primary_key) -> None:
     df = _delete_rows_duplicate_key(df, field_primary_key)
     # First 2 rows should be removed
-    assert df.shape[0] == 1
+    assert df.shape[0] == 2
+    # Check primary key uniqueness
+    assert df[field_primary_key.value].is_unique
 
 
 def test__convert_field_types(df, fields_int, fields_float, fields_datetime, fields_categorical) -> None:
