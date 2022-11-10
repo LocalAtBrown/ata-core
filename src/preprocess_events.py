@@ -110,7 +110,7 @@ def _delete_rows_duplicate_key(df: pd.DataFrame, field_primary_key: Field) -> pd
     """
     Delete all rows whose primary key is repeated in the DataFrame.
     """
-    return df.drop_duplicates(subset=[field_primary_key.value])
+    return df.drop_duplicates(subset=[field_primary_key.value], keep=False)
 
 
 def _convert_field_types(
