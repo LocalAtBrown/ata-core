@@ -28,7 +28,8 @@ class Field(Enum):
     # [FLOAT] Screen width in pixels. Almost 1-to-1 relationship with domain_userid (there are exceptions)
     DVCE_SCREENWIDTH = "dvce_screenwidth"
 
-    # [STR] ID of event. Ideally, this would be the primary key within the site DataFrame
+    # [STR] ID of event. This would be the primary key within the site DataFrame,
+    # and part of the [site_name, event_id] composite key in the database table
     EVENT_ID = "event_id"
 
     # [STR, CATEGORICAL] Name of event. Can be "page_view", "page_ping", "focus_form", "change_form", "submit_form"
