@@ -1,7 +1,7 @@
 import logging.config
 
 # TODO: As soon as we have a top-level place to store all config variables, move this into it
-# Details here: https://docs.python.org/3.7/library/logging.config.html#logging.config.dictConfig
+# Details here: https://docs.python.org/3.9/library/logging.config.html#logging.config.dictConfig
 CONFIG = {
     "version": 1,
     "disable_existing_loggers": True,  # Disables some annoying logs from boto3
