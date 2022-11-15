@@ -12,9 +12,9 @@ from pandas.api.types import (
 from src.preprocess_events import (
     Field,
     _convert_field_types,
-    _delete_fields,
     _delete_rows_duplicate_key,
     _delete_rows_empty,
+    _select_fields_relevant,
 )
 
 # ---------- FIXTURES ----------
@@ -45,12 +45,14 @@ def df() -> pd.DataFrame:
 
 
 @pytest.fixture(scope="module")
-def fields_to_keep() -> Set[Field]:
-    return {Field.EVENT_ID, Field.DERIVED_TSTAMP}
+def fields_relevant() -> Set[Field]:
+    return {Field.EVENT_ID, Field.DERIVED_TSTAMP, Field.PAGE_URLPATH}
 
 
 @pytest.fixture(scope="module")
 def fields_required() -> Set[Field]:
+    # Field.Event_NAME isn't included in the dummy DataFrame, but it should
+    # still be included in the output DataFrame as an empty column
     return {Field.EVENT_ID, Field.DOC_HEIGHT, Field.DERIVED_TSTAMP, Field.EVENT_NAME}
 
 
@@ -80,9 +82,9 @@ def fields_categorical() -> Set[Field]:
 
 
 # ---------- TESTS ----------
-def test__delete_fields(df, fields_to_keep) -> None:
-    df = _delete_fields(df, fields_to_keep)
-    assert df.shape[1] == 2
+def test__select_fields_relevant(df, fields_relevant) -> None:
+    df = _select_fields_relevant(df, fields_relevant)
+    assert set(df.columns) == set([f.value for f in fields_relevant])
 
 
 def test__delete_rows_empty(df, fields_required) -> None:

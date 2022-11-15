@@ -72,7 +72,7 @@ class Field(Enum):
 
 def preprocess_events(
     df: pd.DataFrame,
-    fields_to_keep: Set[Field],
+    fields_relevant: Set[Field],
     fields_required: Set[Field],
     field_primary_key: Field,
     fields_int: Set[Field],
@@ -84,7 +84,7 @@ def preprocess_events(
     Main Snowplow events DataFrame preprocessing function.
     """
     # TODO: After each step, if applicable, log how many rows or fields were deleted
-    df = _delete_fields(df, fields_to_keep)
+    df = _select_fields_relevant(df, fields_relevant)
     df = _delete_rows_duplicate_key(df, field_primary_key)
     df = _delete_rows_empty(df, fields_required)
     df = _convert_field_types(df, fields_int, fields_float, fields_datetime, fields_categorical)
@@ -92,11 +92,23 @@ def preprocess_events(
     return df
 
 
-def _delete_fields(df: pd.DataFrame, fields_to_keep: Set[Field]) -> pd.DataFrame:
+def _select_fields_relevant(df: pd.DataFrame, fields_relevant: Set[Field]) -> pd.DataFrame:
     """
-    Remove unncessary fields from an events DataFrame.
+    Select relevant fields from an events DataFrame. If a field doesn't exist,
+    it'll be added to the result DataFrame as an empty column.
     """
-    return df[[f.value for f in fields_to_keep]]
+    # List of field names as str
+    fields_relevant_list = [f.value for f in fields_relevant]
+    # Sometimes, df doesn't have all the fields in fields_relevant, so we create
+    # an empty DataFrame with all the fields we'd like to have and concatenate df to it
+    df_empty_with_all_fields = pd.DataFrame(columns=fields_relevant_list)
+    # Get a list of fields in fields_relevant that are actually in df, because we
+    # don't want to query for nonexistent fields and have pandas raise a KeyError
+    fields_available = df.columns.intersection(fields_relevant_list)
+
+    # Query for fields in fields_available and perform said concatenation, so that
+    # the final DataFrame will have all the fields in fields_relevant
+    return pd.concat([df_empty_with_all_fields, df[fields_available]])
 
 
 def _delete_rows_empty(df: pd.DataFrame, fields_required: Set[Field]) -> pd.DataFrame:
