@@ -92,12 +92,12 @@ def preprocess_events(
     """
     Main Snowplow events DataFrame preprocessing function.
     """
-    num_rows, num_fields = df.shape
-
-    # Delete unncessary fields
+    # Select fields we're interested in
     df = _select_fields_relevant(df, fields_relevant)
+    logger.info("Selected relevant fields")
 
     # Delete rows with duplicate primary key
+    num_rows = df.shape[0]
     df = _delete_rows_duplicate_key(df, field_primary_key)
     logger.info(
         f"Deleted {num_rows - df.shape[0]} rows with duplicate {field_primary_key.value} from staged DataFrame. {df.shape[0]} rows remaining"
@@ -112,7 +112,7 @@ def preprocess_events(
 
     # Convert field data types
     df = _convert_field_types(df, fields_int, fields_float, fields_datetime, fields_categorical)
-    logger.info(f"Converted field data types")
+    logger.info("Converted field data types")
 
     return df
 
