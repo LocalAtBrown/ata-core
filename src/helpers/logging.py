@@ -1,7 +1,7 @@
 import logging
 import logging.config
 
-# To use this logging config in another python module:
+# To use this logging config in another module:
 # >>> from src.helpers.logging import logging
 # >>> logger = logging.getLogger(__name__)
 # >>> logger.info("Hello, I'm a log")
