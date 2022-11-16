@@ -12,14 +12,13 @@ from pandas.api.types import (
 from src.preprocess_events import (
     Field,
     _convert_field_types,
-    _delete_fields,
     _delete_rows_duplicate_key,
     _delete_rows_empty,
+    _select_fields_relevant,
 )
 
+
 # ---------- FIXTURES ----------
-
-
 @pytest.fixture(scope="module")
 def df() -> pd.DataFrame:
     """
@@ -45,12 +44,14 @@ def df() -> pd.DataFrame:
 
 
 @pytest.fixture(scope="module")
-def fields_to_keep() -> Set[Field]:
-    return {Field.EVENT_ID, Field.DERIVED_TSTAMP}
+def fields_relevant() -> Set[Field]:
+    return {Field.EVENT_ID, Field.DERIVED_TSTAMP, Field.PAGE_URLPATH}
 
 
 @pytest.fixture(scope="module")
 def fields_required() -> Set[Field]:
+    # Field.Event_NAME isn't included in the dummy DataFrame, but it should
+    # still be included in the output DataFrame as an empty column
     return {Field.EVENT_ID, Field.DOC_HEIGHT, Field.DERIVED_TSTAMP, Field.EVENT_NAME}
 
 
@@ -80,9 +81,9 @@ def fields_categorical() -> Set[Field]:
 
 
 # ---------- TESTS ----------
-def test__delete_fields(df, fields_to_keep) -> None:
-    df = _delete_fields(df, fields_to_keep)
-    assert df.shape[1] == 2
+def test__select_fields_relevant(df, fields_relevant) -> None:
+    df = _select_fields_relevant(df, fields_relevant)
+    assert set(df.columns) == fields_relevant
 
 
 def test__delete_rows_empty(df, fields_required) -> None:
@@ -91,7 +92,7 @@ def test__delete_rows_empty(df, fields_required) -> None:
     assert df.shape[0] == 2
     # isna() should return False for all cells under required fields;
     # these false values sum up to 0
-    assert df[[f.value for f in fields_required]].isna().to_numpy().sum() == 0
+    assert df[[*fields_required]].isna().to_numpy().sum() == 0
 
 
 def test__delete_rows_duplicate_key(df, field_primary_key) -> None:
@@ -99,20 +100,20 @@ def test__delete_rows_duplicate_key(df, field_primary_key) -> None:
     # First 2 rows should be removed
     assert df.shape[0] == 2
     # Check primary key uniqueness
-    assert df[field_primary_key.value].is_unique
+    assert df[field_primary_key].is_unique
 
 
 def test__convert_field_types(df, fields_int, fields_float, fields_datetime, fields_categorical) -> None:
     df = _convert_field_types(df, fields_int, fields_float, fields_datetime, fields_categorical)
 
     for f in fields_int:
-        assert is_int64_dtype(df[f.value])
+        assert is_int64_dtype(df[f])
 
     for f in fields_float:
-        assert is_float_dtype(df[f.value])
+        assert is_float_dtype(df[f])
 
     for f in fields_datetime:
-        assert is_datetime64_ns_dtype(df[f.value])
+        assert is_datetime64_ns_dtype(df[f])
 
     for f in fields_categorical:
-        assert is_categorical_dtype(df[f.value])
+        assert is_categorical_dtype(df[f])
