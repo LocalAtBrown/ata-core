@@ -99,7 +99,7 @@ def preprocess_events(
     # Delete rows with duplicate primary key
     num_rows = df.shape[0]
     df = _delete_rows_duplicate_key(df, field_primary_key)
-    logger.info(f"Deleted {num_rows - df.shape[0]} rows with duplicate {field_primary_key.value} from staged DataFrame")
+    logger.info(f"Deleted {num_rows - df.shape[0]} rows with duplicate {field_primary_key} from staged DataFrame")
 
     # Delete rows with empty data where required
     num_rows = df.shape[0]
