@@ -4,10 +4,15 @@ from typing import Set
 import pandas as pd
 
 
-class Field(Enum):
+class Field(str, Enum):
     """
     Enum for Snowplow fields of interest.
     Snowplow documentation of these fields can be found here: https://docs.snowplow.io/docs/understanding-your-pipeline/canonical-event/.
+
+    This class also subclasses from str so that, e.g., Field.DERIVED_TSTAMP == "derived_tstamp",
+    which means we can pass Field.DERIVED_TSTAMP into a pandas DataFrame directly without having
+    to grab its string value (Field.DERIVED_TSTAMP.value) first. (See use case as well as caveats:
+    https://stackoverflow.com/questions/58608361/string-based-enum-in-python.)
     """
 
     # [DATETIME] Timestamp making allowance for innaccurate device clock
@@ -97,18 +102,16 @@ def _select_fields_relevant(df: pd.DataFrame, fields_relevant: Set[Field]) -> pd
     Select relevant fields from an events DataFrame. If a field doesn't exist,
     it'll be added to the result DataFrame as an empty column.
     """
-    # List of field names as str
-    fields_relevant_list = [f.value for f in fields_relevant]
     # Sometimes, df doesn't have all the fields in fields_relevant, so we create
     # an empty DataFrame with all the fields we'd like to have and concatenate df to it
-    df_empty_with_all_fields = pd.DataFrame(columns=fields_relevant_list)
+    df_empty_with_all_fields = pd.DataFrame(columns=[*fields_relevant])
     # Get a list of fields in fields_relevant that are actually in df, because we
     # don't want to query for nonexistent fields and have pandas raise a KeyError
-    fields_available = df.columns.intersection(fields_relevant_list)
+    fields_available = df.columns.intersection([*fields_relevant])
 
     # Query for fields in fields_available and perform said concatenation, so that
     # the final DataFrame will have all the fields in fields_relevant
-    return pd.concat([df_empty_with_all_fields, df[fields_available]])
+    return pd.concat([df_empty_with_all_fields, df[[*fields_available]]])
 
 
 def _delete_rows_empty(df: pd.DataFrame, fields_required: Set[Field]) -> pd.DataFrame:
@@ -116,14 +119,14 @@ def _delete_rows_empty(df: pd.DataFrame, fields_required: Set[Field]) -> pd.Data
     Given a list of fields that cannot have empty or null data, remove all rows
     with null values in any of these fields.
     """
-    return df.dropna(subset=[f.value for f in fields_required])
+    return df.dropna(subset=[*fields_required])
 
 
 def _delete_rows_duplicate_key(df: pd.DataFrame, field_primary_key: Field) -> pd.DataFrame:
     """
     Delete all rows whose primary key is repeated in the DataFrame.
     """
-    return df.drop_duplicates(subset=[field_primary_key.value], keep=False)
+    return df.drop_duplicates(subset=[field_primary_key], keep=False)
 
 
 def _convert_field_types(
@@ -140,19 +143,16 @@ def _convert_field_types(
     # this if memory is an issue
     df = df.copy()
 
-    fields_int_list = [f.value for f in fields_int]
-    fields_float_list = [f.value for f in fields_float]
-    fields_datetime_list = [f.value for f in fields_datetime]
-    fields_categorical_list = [f.value for f in fields_categorical]
+    df[[*fields_int]] = df[[*fields_int]].astype(int)
+    df[[*fields_float]] = df[[*fields_float]].astype(float)
 
-    df[fields_int_list] = df[fields_int_list].astype(int)
-    df[fields_float_list] = df[fields_float_list].astype(float)
     # pd.to_datetime can only turn pandas Series to datetime, so need to convert
     # one Series/column at a time
     # All timestamps should already be in UTC: https://discourse.snowplow.io/t/what-timezones-are-the-timestamps-set-in/622,
     # but setting utc=True just to be safe
-    for field in fields_datetime_list:
+    for field in fields_datetime:
         df[field] = pd.to_datetime(df[field], utc=True)
-    df[fields_categorical_list] = df[fields_categorical_list].astype("category")
+
+    df[[*fields_categorical]] = df[[*fields_categorical]].astype("category")
 
     return df
