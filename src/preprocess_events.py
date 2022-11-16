@@ -99,21 +99,20 @@ def preprocess_events(
     # Delete rows with duplicate primary key
     num_rows = df.shape[0]
     df = _delete_rows_duplicate_key(df, field_primary_key)
-    logger.info(
-        f"Deleted {num_rows - df.shape[0]} rows with duplicate {field_primary_key.value} from staged DataFrame. {df.shape[0]} rows remaining"
-    )
+    logger.info(f"Deleted {num_rows - df.shape[0]} rows with duplicate {field_primary_key.value} from staged DataFrame")
 
     # Delete rows with empty data where required
     num_rows = df.shape[0]
     df = _delete_rows_empty(df, fields_required)
     logger.info(
-        f"Deleted {num_rows - df.shape[0]} rows with at least 1 empty cell in a required field from staged DataFrame. {df.shape[0]} rows remaining"
+        f"Deleted {num_rows - df.shape[0]} rows with at least 1 empty cell in a required field from staged DataFrame"
     )
 
     # Convert field data types
     df = _convert_field_types(df, fields_int, fields_float, fields_datetime, fields_categorical)
     logger.info("Converted field data types")
 
+    logger.info(f"Preprocessed DataFrame shape: {df.shape}")
     return df
 
 

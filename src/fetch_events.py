@@ -9,6 +9,10 @@ import pandas as pd
 from mypy_boto3_s3.service_resource import ObjectSummary, S3ServiceResource
 from mypy_boto3_s3.type_defs import GetObjectOutputTypeDef
 
+from src.helpers.logging import logging
+
+logger = logging.getLogger(__name__)
+
 
 def fetch_events(
     s3_resource: S3ServiceResource, site_bucket_name: str, timestamps: List[datetime], num_concurrent_downloads: int
@@ -41,7 +45,10 @@ def fetch_events(
     with ThreadPoolExecutor(max_workers=num_concurrent_downloads) as executor:
         dfs = executor.map(_fetch_decompress_parse, object_summaries)
 
-    return pd.concat(dfs)
+    df = pd.concat(dfs)
+    logger.info(f"Fetched DataFrame shape: {df.shape}")
+
+    return df
 
 
 def _fetch_decompress_parse(object_summary: ObjectSummary) -> pd.DataFrame:

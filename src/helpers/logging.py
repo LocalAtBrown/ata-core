@@ -1,7 +1,7 @@
 import logging
 import logging.config
 
-# To use this logging config in another python module, we can do:
+# To use this logging config in another python module:
 # >>> from src.helpers.logging import logging
 # >>> logger = logging.getLogger(__name__)
 # >>> logger.info("Hello, I'm a log")
@@ -15,8 +15,9 @@ CONFIG = {
     "disable_existing_loggers": True,  # Disables some annoying logs from boto3
     "formatters": {
         "standard": {
-            "format": "%(asctime)s.%(msecs).3d  %(levelname)-8s  %(name)s: %(message)s",
-            "datefmt": "%Y-%m-%d %H:%M:%S",
+            # CloudWatch will already have timestamps for logs, but can add %(asctime)s.%(msecs).3d for timestamp if needed
+            "format": "%(levelname)-8s  %(name)s:%(lineno)s: %(message)s",
+            # "datefmt": "%Y-%m-%d %H:%M:%S",
         },
     },
     "handlers": {
