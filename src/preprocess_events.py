@@ -3,6 +3,10 @@ from typing import Set
 
 import pandas as pd
 
+from src.helpers.logging import logging
+
+logger = logging.getLogger(__name__)
+
 
 class Field(str, Enum):
     """
@@ -88,12 +92,27 @@ def preprocess_events(
     """
     Main Snowplow events DataFrame preprocessing function.
     """
-    # TODO: After each step, if applicable, log how many rows or fields were deleted
+    # Select fields we're interested in
     df = _select_fields_relevant(df, fields_relevant)
-    df = _delete_rows_duplicate_key(df, field_primary_key)
-    df = _delete_rows_empty(df, fields_required)
-    df = _convert_field_types(df, fields_int, fields_float, fields_datetime, fields_categorical)
+    logger.info("Selected relevant fields")
 
+    # Delete rows with duplicate primary key
+    num_rows = df.shape[0]
+    df = _delete_rows_duplicate_key(df, field_primary_key)
+    logger.info(f"Deleted {num_rows - df.shape[0]} rows with duplicate {field_primary_key} from staged DataFrame")
+
+    # Delete rows with empty data where required
+    num_rows = df.shape[0]
+    df = _delete_rows_empty(df, fields_required)
+    logger.info(
+        f"Deleted {num_rows - df.shape[0]} rows with at least 1 empty cell in a required field from staged DataFrame"
+    )
+
+    # Convert field data types
+    df = _convert_field_types(df, fields_int, fields_float, fields_datetime, fields_categorical)
+    logger.info("Converted field data types")
+
+    logger.info(f"Preprocessed DataFrame shape: {df.shape}")
     return df
 
 

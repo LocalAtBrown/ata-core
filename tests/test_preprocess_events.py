@@ -33,12 +33,12 @@ def df() -> pd.DataFrame:
             ["C2", "1", "1500", "400", None, None],
         ],
         columns=[
-            Field.EVENT_ID.value,
-            Field.DOMAIN_SESSIONIDX.value,
-            Field.DOC_HEIGHT.value,
-            Field.PP_YOFFSET_MAX.value,
-            Field.DERIVED_TSTAMP.value,
-            Field.EVENT_NAME.value,
+            Field.EVENT_ID,
+            Field.DOMAIN_SESSIONIDX,
+            Field.DOC_HEIGHT,
+            Field.PP_YOFFSET_MAX,
+            Field.DERIVED_TSTAMP,
+            Field.EVENT_NAME,
         ],
     )
 
