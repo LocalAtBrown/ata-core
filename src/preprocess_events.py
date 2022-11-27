@@ -88,6 +88,9 @@ class Preprocessor(ABC):
     """
 
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Transforms a Snowplow DataFrame using parameters predefined in the dataclass.
+        """
         pass
 
 
