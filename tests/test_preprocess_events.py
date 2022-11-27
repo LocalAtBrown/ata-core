@@ -10,11 +10,11 @@ from pandas.api.types import (
 )
 
 from src.preprocess_events import (
+    ConvertFieldTypes,
+    DeleteRowsDuplicateKey,
+    DeleteRowsEmpty,
     Field,
-    _convert_field_types,
-    _delete_rows_duplicate_key,
-    _delete_rows_empty,
-    _select_fields_relevant,
+    SelectFieldsRelevant,
 )
 
 
@@ -81,13 +81,13 @@ def fields_categorical() -> Set[Field]:
 
 
 # ---------- TESTS ----------
-def test__select_fields_relevant(df, fields_relevant) -> None:
-    df = _select_fields_relevant(df, fields_relevant)
+def test_select_fields_relevant(df, fields_relevant) -> None:
+    df = SelectFieldsRelevant(fields_relevant).transform(df)
     assert set(df.columns) == fields_relevant
 
 
-def test__delete_rows_empty(df, fields_required) -> None:
-    df = _delete_rows_empty(df, fields_required)
+def test_delete_rows_empty(df, fields_required) -> None:
+    df = DeleteRowsEmpty(fields_required).transform(df)
     # doc_height is not required, so the first row is off the hook
     assert df.shape[0] == 2
     # isna() should return False for all cells under required fields;
@@ -95,16 +95,16 @@ def test__delete_rows_empty(df, fields_required) -> None:
     assert df[[*fields_required]].isna().to_numpy().sum() == 0
 
 
-def test__delete_rows_duplicate_key(df, field_primary_key) -> None:
-    df = _delete_rows_duplicate_key(df, field_primary_key)
+def test_delete_rows_duplicate_key(df, field_primary_key) -> None:
+    df = DeleteRowsDuplicateKey(field_primary_key).transform(df)
     # First 2 rows should be removed
     assert df.shape[0] == 2
     # Check primary key uniqueness
     assert df[field_primary_key].is_unique
 
 
-def test__convert_field_types(df, fields_int, fields_float, fields_datetime, fields_categorical) -> None:
-    df = _convert_field_types(df, fields_int, fields_float, fields_datetime, fields_categorical)
+def test_convert_field_types(df, fields_int, fields_float, fields_datetime, fields_categorical) -> None:
+    df = ConvertFieldTypes(fields_int, fields_float, fields_datetime, fields_categorical).transform(df)
 
     for f in fields_int:
         assert is_int64_dtype(df[f])
