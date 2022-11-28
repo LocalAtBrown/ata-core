@@ -70,3 +70,12 @@ class FieldSnowplow(str, Enum):
 
     # [STR] Raw useragent
     USERAGENT = "useragent"
+
+
+class FieldNew(str, Enum):
+    """
+    Enum for non-Snowplow fields to be added.
+    """
+
+    # [STR] Site partner's name (as a slug corresponding to its S3 bucket)
+    SITE_NAME = "site_name"

@@ -4,8 +4,9 @@ from typing import Set
 
 import pandas as pd
 
-from src.helpers.fields import FieldSnowplow
+from src.helpers.fields import FieldNew, FieldSnowplow
 from src.helpers.logging import logging
+from src.helpers.site import SiteName
 
 logger = logging.getLogger(__name__)
 
@@ -134,3 +135,25 @@ class ConvertFieldTypes(Preprocessor):
 
     def log_result(self, df_in=None, df_out=None) -> None:
         logger.info("Converted field data types")
+
+
+@dataclass
+class AddFieldSiteName(Preprocessor):
+    """
+    Adds a constant field holding partner's name to the Snowplow events DataFrame.
+    """
+
+    site_name: SiteName
+    field_site_name: FieldNew
+
+    def transform(self, df: pd.DataFrame) -> pd.DataFrame:
+        # Make a copy of the original so that it's not affected, but can remove
+        # this if memory is an issue
+        df = df.copy()
+
+        df[self.field_site_name] = self.site_name
+
+        return df
+
+    def log_result(self, df_in=None, df_out=None) -> None:
+        logger.info(f"Added site name {self.site_name} as a new field")
