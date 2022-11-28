@@ -4,7 +4,7 @@ from typing import Set
 
 import pandas as pd
 
-from src.helpers.fields import Field
+from src.helpers.fields import FieldSnowplow
 from src.helpers.logging import logging
 
 logger = logging.getLogger(__name__)
@@ -46,7 +46,7 @@ class SelectFieldsRelevant(Preprocessor):
     it'll be added to the result DataFrame as an empty column.
     """
 
-    fields_relevant: Set[Field]
+    fields_relevant: Set[FieldSnowplow]
 
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
         # Sometimes, df doesn't have all the fields in fields_relevant, so we create
@@ -73,7 +73,7 @@ class DeleteRowsEmpty(Preprocessor):
     with null values in any of these fields.
     """
 
-    fields_required: Set[Field]
+    fields_required: Set[FieldSnowplow]
 
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
         return df.dropna(subset=[*self.fields_required])
@@ -90,7 +90,7 @@ class DeleteRowsDuplicateKey(Preprocessor):
     Delete all rows whose primary key is repeated in the DataFrame.
     """
 
-    field_primary_key: Field
+    field_primary_key: FieldSnowplow
 
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
         return df.drop_duplicates(subset=[self.field_primary_key], keep=False)
@@ -108,10 +108,10 @@ class ConvertFieldTypes(Preprocessor):
     Changes data types in a Snowplow events DataFrame to those desired.
     """
 
-    fields_int: Set[Field]
-    fields_float: Set[Field]
-    fields_datetime: Set[Field]
-    fields_categorical: Set[Field]
+    fields_int: Set[FieldSnowplow]
+    fields_float: Set[FieldSnowplow]
+    fields_datetime: Set[FieldSnowplow]
+    fields_categorical: Set[FieldSnowplow]
 
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
         # Make a copy of the original so that it's not affected, but can remove

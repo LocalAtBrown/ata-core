@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class Field(str, Enum):
+class FieldSnowplow(str, Enum):
     """
     Enum for Snowplow fields of interest.
     Snowplow documentation of these fields can be found here: https://docs.snowplow.io/docs/understanding-your-pipeline/canonical-event/.

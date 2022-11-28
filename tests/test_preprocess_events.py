@@ -9,7 +9,7 @@ from pandas.api.types import (
     is_int64_dtype,
 )
 
-from src.helpers.fields import Field
+from src.helpers.fields import FieldSnowplow
 from src.helpers.preprocessors import (
     ConvertFieldTypes,
     DeleteRowsDuplicateKey,
@@ -33,51 +33,51 @@ def df() -> pd.DataFrame:
             ["C2", "1", "1500", "400", None, None],
         ],
         columns=[
-            Field.EVENT_ID,
-            Field.DOMAIN_SESSIONIDX,
-            Field.DOC_HEIGHT,
-            Field.PP_YOFFSET_MAX,
-            Field.DERIVED_TSTAMP,
-            Field.EVENT_NAME,
+            FieldSnowplow.EVENT_ID,
+            FieldSnowplow.DOMAIN_SESSIONIDX,
+            FieldSnowplow.DOC_HEIGHT,
+            FieldSnowplow.PP_YOFFSET_MAX,
+            FieldSnowplow.DERIVED_TSTAMP,
+            FieldSnowplow.EVENT_NAME,
         ],
     )
 
 
 @pytest.fixture(scope="module")
-def fields_relevant() -> Set[Field]:
-    return {Field.EVENT_ID, Field.DERIVED_TSTAMP, Field.PAGE_URLPATH}
+def fields_relevant() -> Set[FieldSnowplow]:
+    return {FieldSnowplow.EVENT_ID, FieldSnowplow.DERIVED_TSTAMP, FieldSnowplow.PAGE_URLPATH}
 
 
 @pytest.fixture(scope="module")
-def fields_required() -> Set[Field]:
-    # Field.Event_NAME isn't included in the dummy DataFrame, but it should
+def fields_required() -> Set[FieldSnowplow]:
+    # FieldSnowplow.Event_NAME isn't included in the dummy DataFrame, but it should
     # still be included in the output DataFrame as an empty column
-    return {Field.EVENT_ID, Field.DOC_HEIGHT, Field.DERIVED_TSTAMP, Field.EVENT_NAME}
+    return {FieldSnowplow.EVENT_ID, FieldSnowplow.DOC_HEIGHT, FieldSnowplow.DERIVED_TSTAMP, FieldSnowplow.EVENT_NAME}
 
 
 @pytest.fixture(scope="module")
-def field_primary_key() -> Field:
-    return Field.EVENT_ID
+def field_primary_key() -> FieldSnowplow:
+    return FieldSnowplow.EVENT_ID
 
 
 @pytest.fixture(scope="module")
-def fields_int() -> Set[Field]:
-    return {Field.DOMAIN_SESSIONIDX}
+def fields_int() -> Set[FieldSnowplow]:
+    return {FieldSnowplow.DOMAIN_SESSIONIDX}
 
 
 @pytest.fixture(scope="module")
-def fields_float() -> Set[Field]:
-    return {Field.DOC_HEIGHT, Field.PP_YOFFSET_MAX}
+def fields_float() -> Set[FieldSnowplow]:
+    return {FieldSnowplow.DOC_HEIGHT, FieldSnowplow.PP_YOFFSET_MAX}
 
 
 @pytest.fixture(scope="module")
-def fields_datetime() -> Set[Field]:
-    return {Field.DERIVED_TSTAMP}
+def fields_datetime() -> Set[FieldSnowplow]:
+    return {FieldSnowplow.DERIVED_TSTAMP}
 
 
 @pytest.fixture(scope="module")
-def fields_categorical() -> Set[Field]:
-    return {Field.EVENT_NAME}
+def fields_categorical() -> Set[FieldSnowplow]:
+    return {FieldSnowplow.EVENT_NAME}
 
 
 # ---------- TESTS ----------
