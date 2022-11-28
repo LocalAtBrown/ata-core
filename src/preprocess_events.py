@@ -87,10 +87,25 @@ class Preprocessor(ABC):
     variables needed for the specific transformation.
     """
 
+    def __call__(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Calls an instance of a child class as if it's a (preprocessing) function
+        """
+        df_out = self.transform(df)
+        self.log_result(df, df_out)
+        return df_out
+
     @abstractmethod
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Transforms a Snowplow DataFrame using parameters predefined in the dataclass.
+        """
+        pass
+
+    @abstractmethod
+    def log_result(self, df_in: pd.DataFrame, df_out: pd.DataFrame) -> None:
+        """
+        Logs useful post-transformation messages
         """
         pass
 
@@ -114,7 +129,12 @@ class SelectFieldsRelevant(Preprocessor):
 
         # Query for fields in fields_available and perform said concatenation, so that
         # the final DataFrame will have all the fields in fields_relevant
-        return pd.concat([df_empty_with_all_fields, df[[*fields_available]]])
+        df = pd.concat([df_empty_with_all_fields, df[[*fields_available]]])
+
+        return df
+
+    def log_result(self, df_in=None, df_out=None) -> None:
+        logger.info("Selected relevant fields")
 
 
 @dataclass
@@ -129,6 +149,11 @@ class DeleteRowsEmpty(Preprocessor):
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
         return df.dropna(subset=[*self.fields_required])
 
+    def log_result(self, df_in: pd.DataFrame, df_out: pd.DataFrame) -> None:
+        logger.info(
+            f"Deleted {df_in.shape[0] - df_out.shape[0]} rows with at least 1 empty cell in a required field from staged DataFrame"
+        )
+
 
 @dataclass
 class DeleteRowsDuplicateKey(Preprocessor):
@@ -140,6 +165,11 @@ class DeleteRowsDuplicateKey(Preprocessor):
 
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
         return df.drop_duplicates(subset=[self.field_primary_key], keep=False)
+
+    def log_result(self, df_in: pd.DataFrame, df_out: pd.DataFrame) -> None:
+        logger.info(
+            f"Deleted {df_in.shape[0] - df_out.shape[0]} rows with duplicate {self.field_primary_key} from staged DataFrame"
+        )
 
 
 @dataclass
@@ -173,6 +203,9 @@ class ConvertFieldTypes(Preprocessor):
 
         return df
 
+    def log_result(self, df_in=None, df_out=None) -> None:
+        logger.info("Converted field data types")
+
 
 def preprocess_events(df: pd.DataFrame, preprocessors: List[Preprocessor]) -> pd.DataFrame:
     """
@@ -181,6 +214,7 @@ def preprocess_events(df: pd.DataFrame, preprocessors: List[Preprocessor]) -> pd
     becomes the input DataFrame of the one after it, the order of preprocessors matters.
     """
     for preprocessor in preprocessors:
-        df = preprocessor.transform(df)
+        df = preprocessor(df)
 
+    logger.info(f"Preprocessed DataFrame shape: {df.shape}")
     return df
