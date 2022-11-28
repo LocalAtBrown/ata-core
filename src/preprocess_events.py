@@ -89,7 +89,7 @@ class Preprocessor(ABC):
 
     def __call__(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Calls an instance of a child class as if it's a (preprocessing) function
+        Calls an instance of a child class as if it's a (preprocessing) function.
         """
         df_out = self.transform(df)
         self.log_result(df, df_out)
@@ -105,7 +105,7 @@ class Preprocessor(ABC):
     @abstractmethod
     def log_result(self, df_in: pd.DataFrame, df_out: pd.DataFrame) -> None:
         """
-        Logs useful post-transformation messages
+        Logs useful post-transformation messages.
         """
         pass
 
