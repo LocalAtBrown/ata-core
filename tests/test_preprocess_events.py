@@ -9,13 +9,15 @@ from pandas.api.types import (
     is_int64_dtype,
 )
 
-from src.helpers.fields import FieldSnowplow
+from src.helpers.fields import FieldNew, FieldSnowplow
 from src.helpers.preprocessors import (
+    AddFieldSiteName,
     ConvertFieldTypes,
     DeleteRowsDuplicateKey,
     DeleteRowsEmpty,
     SelectFieldsRelevant,
 )
+from src.helpers.site import SiteName
 
 
 # ---------- FIXTURES ----------
@@ -80,14 +82,24 @@ def fields_categorical() -> Set[FieldSnowplow]:
     return {FieldSnowplow.EVENT_NAME}
 
 
+@pytest.fixture(scope="module")
+def site_name() -> SiteName:
+    return SiteName.AFRO_LA
+
+
+@pytest.fixture(scope="module")
+def field_site_name() -> FieldNew:
+    return FieldNew.SITE_NAME
+
+
 # ---------- TESTS ----------
 def test_select_fields_relevant(df, fields_relevant) -> None:
-    df = SelectFieldsRelevant(fields_relevant).transform(df)
+    df = SelectFieldsRelevant(fields_relevant)(df)
     assert set(df.columns) == fields_relevant
 
 
 def test_delete_rows_empty(df, fields_required) -> None:
-    df = DeleteRowsEmpty(fields_required).transform(df)
+    df = DeleteRowsEmpty(fields_required)(df)
     # doc_height is not required, so the first row is off the hook
     assert df.shape[0] == 2
     # isna() should return False for all cells under required fields;
@@ -96,7 +108,7 @@ def test_delete_rows_empty(df, fields_required) -> None:
 
 
 def test_delete_rows_duplicate_key(df, field_primary_key) -> None:
-    df = DeleteRowsDuplicateKey(field_primary_key).transform(df)
+    df = DeleteRowsDuplicateKey(field_primary_key)(df)
     # First 2 rows should be removed
     assert df.shape[0] == 2
     # Check primary key uniqueness
@@ -104,7 +116,7 @@ def test_delete_rows_duplicate_key(df, field_primary_key) -> None:
 
 
 def test_convert_field_types(df, fields_int, fields_float, fields_datetime, fields_categorical) -> None:
-    df = ConvertFieldTypes(fields_int, fields_float, fields_datetime, fields_categorical).transform(df)
+    df = ConvertFieldTypes(fields_int, fields_float, fields_datetime, fields_categorical)(df)
 
     for f in fields_int:
         assert is_int64_dtype(df[f])
@@ -117,3 +129,8 @@ def test_convert_field_types(df, fields_int, fields_float, fields_datetime, fiel
 
     for f in fields_categorical:
         assert is_categorical_dtype(df[f])
+
+
+def test_add_field_site_name(df, site_name, field_site_name) -> None:
+    df = AddFieldSiteName(site_name, field_site_name)(df)
+    assert (df[field_site_name] == site_name).all()
