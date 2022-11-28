@@ -133,4 +133,5 @@ def test_convert_field_types(df, fields_int, fields_float, fields_datetime, fiel
 
 def test_add_field_site_name(df, site_name, field_site_name) -> None:
     df = AddFieldSiteName(site_name, field_site_name)(df)
+    # pd.Series.all returns True if all of its boolean values are True
     assert (df[field_site_name] == site_name).all()
