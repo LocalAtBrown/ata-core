@@ -9,13 +9,15 @@ from pandas.api.types import (
     is_int64_dtype,
 )
 
-from src.helpers.fields import Field
+from src.helpers.fields import FieldNew, FieldSnowplow
 from src.helpers.preprocessors import (
+    AddFieldSiteName,
     ConvertFieldTypes,
     DeleteRowsDuplicateKey,
     DeleteRowsEmpty,
     SelectFieldsRelevant,
 )
+from src.helpers.site import SiteName
 
 
 # ---------- FIXTURES ----------
@@ -33,61 +35,71 @@ def df() -> pd.DataFrame:
             ["C2", "1", "1500", "400", None, None],
         ],
         columns=[
-            Field.EVENT_ID,
-            Field.DOMAIN_SESSIONIDX,
-            Field.DOC_HEIGHT,
-            Field.PP_YOFFSET_MAX,
-            Field.DERIVED_TSTAMP,
-            Field.EVENT_NAME,
+            FieldSnowplow.EVENT_ID,
+            FieldSnowplow.DOMAIN_SESSIONIDX,
+            FieldSnowplow.DOC_HEIGHT,
+            FieldSnowplow.PP_YOFFSET_MAX,
+            FieldSnowplow.DERIVED_TSTAMP,
+            FieldSnowplow.EVENT_NAME,
         ],
     )
 
 
 @pytest.fixture(scope="module")
-def fields_relevant() -> Set[Field]:
-    return {Field.EVENT_ID, Field.DERIVED_TSTAMP, Field.PAGE_URLPATH}
+def fields_relevant() -> Set[FieldSnowplow]:
+    return {FieldSnowplow.EVENT_ID, FieldSnowplow.DERIVED_TSTAMP, FieldSnowplow.PAGE_URLPATH}
 
 
 @pytest.fixture(scope="module")
-def fields_required() -> Set[Field]:
-    # Field.Event_NAME isn't included in the dummy DataFrame, but it should
+def fields_required() -> Set[FieldSnowplow]:
+    # FieldSnowplow.Event_NAME isn't included in the dummy DataFrame, but it should
     # still be included in the output DataFrame as an empty column
-    return {Field.EVENT_ID, Field.DOC_HEIGHT, Field.DERIVED_TSTAMP, Field.EVENT_NAME}
+    return {FieldSnowplow.EVENT_ID, FieldSnowplow.DOC_HEIGHT, FieldSnowplow.DERIVED_TSTAMP, FieldSnowplow.EVENT_NAME}
 
 
 @pytest.fixture(scope="module")
-def field_primary_key() -> Field:
-    return Field.EVENT_ID
+def field_primary_key() -> FieldSnowplow:
+    return FieldSnowplow.EVENT_ID
 
 
 @pytest.fixture(scope="module")
-def fields_int() -> Set[Field]:
-    return {Field.DOMAIN_SESSIONIDX}
+def fields_int() -> Set[FieldSnowplow]:
+    return {FieldSnowplow.DOMAIN_SESSIONIDX}
 
 
 @pytest.fixture(scope="module")
-def fields_float() -> Set[Field]:
-    return {Field.DOC_HEIGHT, Field.PP_YOFFSET_MAX}
+def fields_float() -> Set[FieldSnowplow]:
+    return {FieldSnowplow.DOC_HEIGHT, FieldSnowplow.PP_YOFFSET_MAX}
 
 
 @pytest.fixture(scope="module")
-def fields_datetime() -> Set[Field]:
-    return {Field.DERIVED_TSTAMP}
+def fields_datetime() -> Set[FieldSnowplow]:
+    return {FieldSnowplow.DERIVED_TSTAMP}
 
 
 @pytest.fixture(scope="module")
-def fields_categorical() -> Set[Field]:
-    return {Field.EVENT_NAME}
+def fields_categorical() -> Set[FieldSnowplow]:
+    return {FieldSnowplow.EVENT_NAME}
+
+
+@pytest.fixture(scope="module")
+def site_name() -> SiteName:
+    return SiteName.AFRO_LA
+
+
+@pytest.fixture(scope="module")
+def field_site_name() -> FieldNew:
+    return FieldNew.SITE_NAME
 
 
 # ---------- TESTS ----------
 def test_select_fields_relevant(df, fields_relevant) -> None:
-    df = SelectFieldsRelevant(fields_relevant).transform(df)
+    df = SelectFieldsRelevant(fields_relevant)(df)
     assert set(df.columns) == fields_relevant
 
 
 def test_delete_rows_empty(df, fields_required) -> None:
-    df = DeleteRowsEmpty(fields_required).transform(df)
+    df = DeleteRowsEmpty(fields_required)(df)
     # doc_height is not required, so the first row is off the hook
     assert df.shape[0] == 2
     # isna() should return False for all cells under required fields;
@@ -96,7 +108,7 @@ def test_delete_rows_empty(df, fields_required) -> None:
 
 
 def test_delete_rows_duplicate_key(df, field_primary_key) -> None:
-    df = DeleteRowsDuplicateKey(field_primary_key).transform(df)
+    df = DeleteRowsDuplicateKey(field_primary_key)(df)
     # First 2 rows should be removed
     assert df.shape[0] == 2
     # Check primary key uniqueness
@@ -104,7 +116,7 @@ def test_delete_rows_duplicate_key(df, field_primary_key) -> None:
 
 
 def test_convert_field_types(df, fields_int, fields_float, fields_datetime, fields_categorical) -> None:
-    df = ConvertFieldTypes(fields_int, fields_float, fields_datetime, fields_categorical).transform(df)
+    df = ConvertFieldTypes(fields_int, fields_float, fields_datetime, fields_categorical)(df)
 
     for f in fields_int:
         assert is_int64_dtype(df[f])
@@ -117,3 +129,9 @@ def test_convert_field_types(df, fields_int, fields_float, fields_datetime, fiel
 
     for f in fields_categorical:
         assert is_categorical_dtype(df[f])
+
+
+def test_add_field_site_name(df, site_name, field_site_name) -> None:
+    df = AddFieldSiteName(site_name, field_site_name)(df)
+    # pd.Series.all returns True if all of its boolean values are True
+    assert (df[field_site_name] == site_name).all()

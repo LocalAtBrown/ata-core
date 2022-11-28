@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class Field(str, Enum):
+class FieldSnowplow(str, Enum):
     """
     Enum for Snowplow fields of interest.
     Snowplow documentation of these fields can be found here: https://docs.snowplow.io/docs/understanding-your-pipeline/canonical-event/.
@@ -70,3 +70,12 @@ class Field(str, Enum):
 
     # [STR] Raw useragent
     USERAGENT = "useragent"
+
+
+class FieldNew(str, Enum):
+    """
+    Enum for non-Snowplow fields to be added.
+    """
+
+    # [STR] Site partner's name (as a slug corresponding to its S3 bucket)
+    SITE_NAME = "site_name"

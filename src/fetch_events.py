@@ -10,12 +10,13 @@ from mypy_boto3_s3.service_resource import ObjectSummary, S3ServiceResource
 from mypy_boto3_s3.type_defs import GetObjectOutputTypeDef
 
 from src.helpers.logging import logging
+from src.helpers.site import SiteName
 
 logger = logging.getLogger(__name__)
 
 
 def fetch_events(
-    s3_resource: S3ServiceResource, site_bucket_name: str, timestamps: List[datetime], num_concurrent_downloads: int
+    s3_resource: S3ServiceResource, site_name: SiteName, timestamps: List[datetime], num_concurrent_downloads: int
 ) -> pd.DataFrame:
     """
     Given config inputs, including a site's bucket name and a list of date-hour
@@ -27,7 +28,7 @@ def fetch_events(
     >>> s3_resource = boto3.resource("s3")
     """
     # Grab S3 bucket
-    bucket = s3_resource.Bucket(site_bucket_name)
+    bucket = s3_resource.Bucket(f"lnl-snowplow-{site_name}")
 
     # Get a list of summaries of S3 objects to fetch
     object_summaries_by_timestamp = [
