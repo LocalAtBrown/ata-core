@@ -1,4 +1,4 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
 from typing import List, Set
@@ -87,6 +87,7 @@ class Preprocessor(ABC):
     variables needed for the specific transformation.
     """
 
+    @abstractmethod
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Transforms a Snowplow DataFrame using parameters predefined in the dataclass.
