@@ -9,11 +9,11 @@ from pandas.api.types import (
     is_int64_dtype,
 )
 
-from src.preprocess_events import (
+from src.helpers.fields import Field
+from src.helpers.preprocessors import (
     ConvertFieldTypes,
     DeleteRowsDuplicateKey,
     DeleteRowsEmpty,
-    Field,
     SelectFieldsRelevant,
 )
 
