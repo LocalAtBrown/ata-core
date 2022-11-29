@@ -34,5 +34,5 @@ def write_events(df: pd.DataFrame, Session: sessionmaker) -> None:
     # Log message
     logger.info(
         f"Inserted {num_rows_inserted} rows into the {Event.__name__} table. "
-        + f"Skipped {df.shape[0] - num_rows_inserted} rows that violated unique key constraint."
+        + f"Skipped {df.shape[0] - num_rows_inserted} rows whose event ID-site name composite key already exists."
     )
