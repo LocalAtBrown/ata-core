@@ -1,29 +1,31 @@
 import pandas as pd
 from ata_db_models.models import Event
 from sqlalchemy.dialects.postgresql import insert
-from sqlalchemy.engine import Engine
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import sessionmaker
 
 from src.helpers.logging import logging
 
 logger = logging.getLogger(__name__)
 
 
-def write_events(df: pd.DataFrame, engine: Engine) -> None:
+def write_events(df: pd.DataFrame, Session: sessionmaker) -> None:
     """
     Writes preprocessed events to database.
+
+    This function accepts a `sessionmaker`, which is a factory for session
+    objects, given an engine. A `sessionmaker` can be created like so:
+    >>> Session = sessionmaker(engine)
     """
     data = df.to_dict(orient="records")
 
+    # Create statement to bulk-insert event rows
+    # Insert.on_conflict_do_nothing skips through events whose [event_id, site_name]
+    # composite key already exists in the DB
+    statement = insert(Event).values(data).on_conflict_do_nothing(index_elements=[Event.site_name, Event.event_id])
+
     # Wrap execution within a begin-commit-rollback block in the form of two
     # context managers (see: https://docs.sqlalchemy.org/en/14/orm/session_basics.html#framing-out-a-begin-commit-rollback-block)
-    with Session(engine) as session, session.begin():
-        # Create statement to bulk-insert event rows
-        # Insert.on_conflict_do_nothing skips through events whose [event_id, site_name]
-        # composite key already exists in the DB
-        statement = insert(Event).values(data).on_conflict_do_nothing(index_elements=[Event.site_name, Event.event_id])
-
-        # Execute statement
+    with Session() as session, session.begin():
         result = session.execute(statement)
 
     # Count number of rows/events inserted
