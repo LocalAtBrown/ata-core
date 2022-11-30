@@ -25,7 +25,7 @@ def write_events(df: pd.DataFrame, session_factory: sessionmaker) -> int:
 
     # Wrap execution within a begin-commit-rollback block in the form of two
     # context managers (see: https://docs.sqlalchemy.org/en/14/orm/session_basics.html#framing-out-a-begin-commit-rollback-block)
-    with session_factory() as session, session.begin():
+    with session_factory.begin() as session:
         result = session.execute(statement)
 
     # Count number of rows/events inserted

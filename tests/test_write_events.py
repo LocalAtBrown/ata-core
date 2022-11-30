@@ -173,7 +173,7 @@ def test_write_events(df, engine, session_factory) -> None:
         write_events(df, session_factory)
 
         # Assert all rows were written
-        with session_factory() as session, session.begin():
+        with session_factory.begin() as session:
             assert session.query(Event).count() == df.shape[0]
 
 
@@ -190,5 +190,5 @@ def test_write_events_duplicate_key(df_duplicate_key, engine, session_factory) -
         assert num_rows_written == 0
 
         # Assert all rows except the last one were written
-        with session_factory() as session, session.begin():
+        with session_factory.begin() as session:
             assert session.query(Event).count() == num_unique_keys
