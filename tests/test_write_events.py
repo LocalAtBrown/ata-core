@@ -62,7 +62,7 @@ def df() -> pd.DataFrame:
                 None,
                 "d4681118-3b33-47d7-8baa-4213cdb9eecd",
                 "16582.0",
-                SiteName.DALLAS_FREE_PRESS,
+                SiteName.AFRO_LA,
             ],
             [
                 "900.0",
@@ -83,7 +83,7 @@ def df() -> pd.DataFrame:
                 None,
                 "e52fd234-77a3-416d-92c3-f9692af4a34b",
                 "3265.0",
-                SiteName.AFRO_LA,
+                SiteName.DALLAS_FREE_PRESS,
             ],
         ],
         columns=[
@@ -127,12 +127,15 @@ def df() -> pd.DataFrame:
 @pytest.fixture(scope="module")
 def df_duplicate_key(df) -> pd.DataFrame:
     df = df.copy()
-    df.loc[1, FieldSnowplow.EVENT_ID] = df.loc[0, FieldSnowplow.EVENT_ID]
+    # Change last event's ID to that of the first. Since both events have the same
+    # site nam, the last one will fail key-uniqueness check
+    df.loc[df.shape[0] - 1, FieldSnowplow.EVENT_ID] = df.loc[0, FieldSnowplow.EVENT_ID]
     return df
 
 
 @pytest.fixture(scope="module")
 def db_name() -> str:
+    # Assuming the local DB name is "postgres"
     return "postgres"
 
 
@@ -165,8 +168,10 @@ def create_and_drop_tables(engine: Engine):
 @pytest.mark.integration
 def test_write_events(df, engine, Session) -> None:
     with create_and_drop_tables(engine):
+        # Write mock events to mock DB
         write_events(df, Session)
 
+        # Assert all rows were written
         with Session() as session, session.begin():
             assert session.query(Event).count() == df.shape[0]
 
@@ -176,7 +181,13 @@ def test_write_events_duplicate_key(df_duplicate_key, engine, Session) -> None:
     num_unique_keys = df_duplicate_key.groupby([FieldSnowplow.EVENT_ID, FieldNew.SITE_NAME]).ngroups
 
     with create_and_drop_tables(engine):
-        write_events(df_duplicate_key, Session)
+        # Write all but the last event to DB. They have unique keys so should all go through
+        write_events(df_duplicate_key.iloc[:-1], Session)
 
+        # Write last event to DB. Its composite key already exists, so it should not go through
+        num_rows_written = write_events(df_duplicate_key.iloc[[-1]], Session)
+        assert num_rows_written == 0
+
+        # Assert all rows except the last one were written
         with Session() as session, session.begin():
             assert session.query(Event).count() == num_unique_keys

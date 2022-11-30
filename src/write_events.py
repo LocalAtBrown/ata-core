@@ -8,7 +8,7 @@ from src.helpers.logging import logging
 logger = logging.getLogger(__name__)
 
 
-def write_events(df: pd.DataFrame, Session: sessionmaker) -> None:
+def write_events(df: pd.DataFrame, Session: sessionmaker) -> int:
     """
     Writes preprocessed events to database.
 
@@ -36,3 +36,5 @@ def write_events(df: pd.DataFrame, Session: sessionmaker) -> None:
         f"Inserted {num_rows_inserted} rows into the {Event.__name__} table. "
         + f"Skipped {df.shape[0] - num_rows_inserted} rows whose event ID-site name composite key already exists."
     )
+
+    return num_rows_inserted
