@@ -32,6 +32,8 @@ import click
 @click.argument("site", type=click.Choice(["afro-la", "dallas-free-press", "open-vallejo", "the-19th"]))
 def backfill(start_date: datetime, days: int, site: str):
     pass
+    # timestamps = get_timestamps(start_date=start_date, days=days)
+    # call function that calls the whole process; handler should call the same fn
 
 
 def get_timestamps(start_date: datetime, days: int) -> List[datetime]:
