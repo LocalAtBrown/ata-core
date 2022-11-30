@@ -8,10 +8,11 @@ from sqlalchemy.orm import sessionmaker
 
 from src.helpers.fields import FieldNew, FieldSnowplow
 from src.helpers.preprocessors import ConvertFieldTypes
+from src.helpers.site import SiteName
 from src.write_events import write_events
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def df() -> pd.DataFrame:
     """
     Returns a dummy DataFrame for testing.
@@ -37,7 +38,7 @@ def df() -> pd.DataFrame:
                 None,
                 "9c6e4788-b05f-4521-a589-52dc6d250e8f",
                 "2654.0",
-                "dallas-free-press",
+                SiteName.DALLAS_FREE_PRESS,
             ],
             [
                 "600.0",
@@ -58,7 +59,7 @@ def df() -> pd.DataFrame:
                 None,
                 "d4681118-3b33-47d7-8baa-4213cdb9eecd",
                 "16582.0",
-                "dallas-free-press",
+                SiteName.DALLAS_FREE_PRESS,
             ],
             [
                 "900.0",
@@ -79,7 +80,7 @@ def df() -> pd.DataFrame:
                 None,
                 "e52fd234-77a3-416d-92c3-f9692af4a34b",
                 "3265.0",
-                "dallas-free-press",
+                SiteName.AFRO_LA,
             ],
         ],
         columns=[
@@ -120,9 +121,21 @@ def df() -> pd.DataFrame:
     return df
 
 
+@pytest.fixture
+def df_duplicate_key(df) -> pd.DataFrame:
+    df = df.copy()
+    df.loc[1, FieldSnowplow.EVENT_ID] = df.loc[0, FieldSnowplow.EVENT_ID]
+    return df
+
+
 @pytest.fixture(scope="module")
-def engine() -> Engine:
-    return create_engine(get_conn_string())
+def db_name() -> str:
+    return "postgres"
+
+
+@pytest.fixture(scope="module")
+def engine(db_name) -> Engine:
+    return create_engine(get_conn_string(db_name))
 
 
 @pytest.fixture(scope="module")
@@ -141,6 +154,23 @@ def test_write_events(df, engine, Session) -> None:
             assert session.query(Event).count() == df.shape[0]
     except Exception as e:
         # Even if assertion (or some other thing) fails, still need to delete table
+        SQLModel.metadata.drop_all(engine)
+        raise e
+    else:
+        SQLModel.metadata.drop_all(engine)
+
+
+@pytest.mark.integration
+def test_write_events_duplicate_key(df_duplicate_key, engine, Session) -> None:
+    SQLModel.metadata.create_all(engine)
+
+    try:
+        write_events(df_duplicate_key, Session)
+        num_unique_keys = df_duplicate_key.groupby([FieldSnowplow.EVENT_ID, FieldNew.SITE_NAME]).ngroups
+        with Session() as session, session.begin():
+            # Row count check, should be 2
+            assert session.query(Event).count() == num_unique_keys
+    except Exception as e:
         SQLModel.metadata.drop_all(engine)
         raise e
     else:
