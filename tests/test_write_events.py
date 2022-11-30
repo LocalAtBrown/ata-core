@@ -140,7 +140,7 @@ def db_name() -> str:
     return "postgres"
 
 
-@pytest.fixture(autouse=True, scope="module")
+@pytest.fixture(scope="module")
 def engine(db_name) -> Engine:
     return create_engine(get_conn_string(db_name))
 
