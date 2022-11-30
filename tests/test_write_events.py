@@ -1,3 +1,5 @@
+from contextlib import contextmanager
+
 import pandas as pd
 import pytest
 from ata_db_models.helpers import get_conn_string
@@ -12,7 +14,8 @@ from src.helpers.site import SiteName
 from src.write_events import write_events
 
 
-@pytest.fixture
+# ---------- FIXTURES ----------
+@pytest.fixture(scope="module")
 def df() -> pd.DataFrame:
     """
     Returns a dummy DataFrame for testing.
@@ -121,7 +124,7 @@ def df() -> pd.DataFrame:
     return df
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def df_duplicate_key(df) -> pd.DataFrame:
     df = df.copy()
     df.loc[1, FieldSnowplow.EVENT_ID] = df.loc[0, FieldSnowplow.EVENT_ID]
@@ -133,7 +136,7 @@ def db_name() -> str:
     return "postgres"
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(autouse=True, scope="module")
 def engine(db_name) -> Engine:
     return create_engine(get_conn_string(db_name))
 
@@ -143,35 +146,36 @@ def Session(engine) -> sessionmaker:
     return sessionmaker(engine)
 
 
+# ---------- HELPERS ----------
+@contextmanager
+def create_and_drop_tables(engine: Engine):
+    """
+    Context manager to safely create and drop tables before and after each test.
+    """
+    SQLModel.metadata.create_all(engine)
+    # The try-finally block ensures tables are still dropped in the event of an exception
+    # (see: https://realpython.com/python-with-statement/#opening-files-for-writing-second-version)
+    try:
+        yield
+    finally:
+        SQLModel.metadata.drop_all(engine)
+
+
+# ---------- TESTS ----------
 @pytest.mark.integration
 def test_write_events(df, engine, Session) -> None:
-    SQLModel.metadata.create_all(engine)
-
-    try:
+    with create_and_drop_tables(engine):
         write_events(df, Session)
+
         with Session() as session, session.begin():
-            # Row count check
             assert session.query(Event).count() == df.shape[0]
-    except Exception as e:
-        # Even if assertion (or some other thing) fails, still need to delete table
-        SQLModel.metadata.drop_all(engine)
-        raise e
-    else:
-        SQLModel.metadata.drop_all(engine)
 
 
 @pytest.mark.integration
 def test_write_events_duplicate_key(df_duplicate_key, engine, Session) -> None:
-    SQLModel.metadata.create_all(engine)
-
-    try:
+    with create_and_drop_tables(engine):
         write_events(df_duplicate_key, Session)
         num_unique_keys = df_duplicate_key.groupby([FieldSnowplow.EVENT_ID, FieldNew.SITE_NAME]).ngroups
+
         with Session() as session, session.begin():
-            # Row count check, should be 2
             assert session.query(Event).count() == num_unique_keys
-    except Exception as e:
-        SQLModel.metadata.drop_all(engine)
-        raise e
-    else:
-        SQLModel.metadata.drop_all(engine)
