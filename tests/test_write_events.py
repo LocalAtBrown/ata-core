@@ -146,7 +146,7 @@ def engine(db_name) -> Engine:
 
 
 @pytest.fixture(scope="module")
-def Session(engine) -> sessionmaker:
+def session_factory(engine) -> sessionmaker:
     return sessionmaker(engine)
 
 
@@ -167,28 +167,28 @@ def create_and_drop_tables(engine: Engine) -> Generator[None, None, None]:
 
 # ---------- TESTS ----------
 @pytest.mark.integration
-def test_write_events(df, engine, Session) -> None:
+def test_write_events(df, engine, session_factory) -> None:
     with create_and_drop_tables(engine):
         # Write mock events to mock DB
-        write_events(df, Session)
+        write_events(df, session_factory)
 
         # Assert all rows were written
-        with Session() as session, session.begin():
+        with session_factory() as session, session.begin():
             assert session.query(Event).count() == df.shape[0]
 
 
 @pytest.mark.integration
-def test_write_events_duplicate_key(df_duplicate_key, engine, Session) -> None:
+def test_write_events_duplicate_key(df_duplicate_key, engine, session_factory) -> None:
     num_unique_keys = df_duplicate_key.groupby([FieldSnowplow.EVENT_ID, FieldNew.SITE_NAME]).ngroups
 
     with create_and_drop_tables(engine):
         # Write all but the last event to DB. They have unique keys so should all go through
-        write_events(df_duplicate_key.iloc[:-1], Session)
+        write_events(df_duplicate_key.iloc[:-1], session_factory)
 
         # Write last event to DB. Its composite key already exists, so it should not go through
-        num_rows_written = write_events(df_duplicate_key.iloc[[-1]], Session)
+        num_rows_written = write_events(df_duplicate_key.iloc[[-1]], session_factory)
         assert num_rows_written == 0
 
         # Assert all rows except the last one were written
-        with Session() as session, session.begin():
+        with session_factory() as session, session.begin():
             assert session.query(Event).count() == num_unique_keys

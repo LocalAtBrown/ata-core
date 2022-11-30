@@ -8,13 +8,13 @@ from src.helpers.logging import logging
 logger = logging.getLogger(__name__)
 
 
-def write_events(df: pd.DataFrame, Session: sessionmaker) -> int:
+def write_events(df: pd.DataFrame, session_factory: sessionmaker) -> int:
     """
     Writes preprocessed events to database.
 
     This function accepts a `sessionmaker`, which is a factory for session
     objects, given an engine. A `sessionmaker` can be created like so:
-    >>> Session = sessionmaker(engine)
+    >>> session_factory = sessionmaker(engine)
     """
     data = df.to_dict(orient="records")
 
@@ -25,7 +25,7 @@ def write_events(df: pd.DataFrame, Session: sessionmaker) -> int:
 
     # Wrap execution within a begin-commit-rollback block in the form of two
     # context managers (see: https://docs.sqlalchemy.org/en/14/orm/session_basics.html#framing-out-a-begin-commit-rollback-block)
-    with Session() as session, session.begin():
+    with session_factory() as session, session.begin():
         result = session.execute(statement)
 
     # Count number of rows/events inserted
