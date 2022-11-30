@@ -25,7 +25,8 @@ def write_events(df: pd.DataFrame, session_factory: sessionmaker) -> int:
 
     # Wrap execution within a begin-commit-rollback block in the form of two
     # context managers (see: https://docs.sqlalchemy.org/en/14/orm/session_basics.html#framing-out-a-begin-commit-rollback-block)
-    with session_factory.begin() as session:
+    # TODO: Once sqlalchemy-stubs catches up to SQLAlchemy 1.4, remove the type: ignore comment below
+    with session_factory.begin() as session:  # type: ignore
         result = session.execute(statement)
 
     # Count number of rows/events inserted
