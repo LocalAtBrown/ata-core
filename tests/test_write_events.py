@@ -1,3 +1,4 @@
+from collections.abc import Generator
 from contextlib import contextmanager
 
 import pandas as pd
@@ -151,7 +152,7 @@ def Session(engine) -> sessionmaker:
 
 # ---------- HELPERS ----------
 @contextmanager
-def create_and_drop_tables(engine: Engine):
+def create_and_drop_tables(engine: Engine) -> Generator[None, None, None]:
     """
     Context manager to safely create and drop tables before and after each test.
     """
