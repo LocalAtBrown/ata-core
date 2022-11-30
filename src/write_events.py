@@ -3,7 +3,6 @@ from ata_db_models.models import Event
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import sessionmaker
 
-from src.helpers.fields import FieldNew, FieldSnowplow
 from src.helpers.logging import logging
 
 logger = logging.getLogger(__name__)
@@ -22,13 +21,7 @@ def write_events(df: pd.DataFrame, Session: sessionmaker) -> int:
     # Create statement to bulk-insert event rows
     # Insert.on_conflict_do_nothing skips through events whose [event_id, site_name]
     # composite key already exists in the DB
-    statement = (
-        insert(Event)
-        .values(data)
-        .on_conflict_do_nothing(
-            index_elements=[getattr(Event, FieldSnowplow.EVENT_ID), getattr(Event, FieldNew.SITE_NAME)]
-        )
-    )
+    statement = insert(Event).values(data).on_conflict_do_nothing(index_elements=[Event.site_name, Event.event_id])
 
     # Wrap execution within a begin-commit-rollback block in the form of two
     # context managers (see: https://docs.sqlalchemy.org/en/14/orm/session_basics.html#framing-out-a-begin-commit-rollback-block)
