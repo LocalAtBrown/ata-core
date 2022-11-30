@@ -173,9 +173,10 @@ def test_write_events(df, engine, Session) -> None:
 
 @pytest.mark.integration
 def test_write_events_duplicate_key(df_duplicate_key, engine, Session) -> None:
+    num_unique_keys = df_duplicate_key.groupby([FieldSnowplow.EVENT_ID, FieldNew.SITE_NAME]).ngroups
+
     with create_and_drop_tables(engine):
         write_events(df_duplicate_key, Session)
-        num_unique_keys = df_duplicate_key.groupby([FieldSnowplow.EVENT_ID, FieldNew.SITE_NAME]).ngroups
 
         with Session() as session, session.begin():
             assert session.query(Event).count() == num_unique_keys
