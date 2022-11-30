@@ -58,8 +58,7 @@ To update dependencies in your local environment, make changes to the `pyproject
 
 ## Tests
 
-We use [pytest](https://docs.pytest.org) to run our tests. Simply run `pytest tests` or a specific
-directory/file/module to run tests.
+We use [pytest](https://docs.pytest.org) to run our tests. Simply run `pytest` to run all tests or `pytest <path>` to run tests in a specific directory/file/module. You can also run `pytest -m unit` to run only unit tests, and `pytest -m integration` to run only integration tests.
 We run continuous integration (CI) via GitHub actions. We have actions to run MyPy and run the tests.
 
 ## Deployment
