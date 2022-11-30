@@ -130,6 +130,7 @@ def Session(engine) -> sessionmaker:
     return sessionmaker(engine)
 
 
+@pytest.mark.integration
 def test_write_events(df, engine, Session) -> None:
     SQLModel.metadata.create_all(engine)
 
