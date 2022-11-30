@@ -45,6 +45,6 @@ jobs:
     - name: run unit tests
       run: pytest -m unit
     - name: run integration tests
-      run: pytset -m integration
+      run: pytest -m integration
     - name: run other tests
       run: pytest -m "not unit and not integration"
