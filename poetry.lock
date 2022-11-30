@@ -15,7 +15,7 @@ tz = ["python-dateutil"]
 
 [[package]]
 name = "ata-db-models"
-version = "0.0.4"
+version = "0.0.6"
 description = "Database models and migrations for Automating the Ask."
 category = "main"
 optional = false
@@ -931,7 +931,7 @@ testing = ["coverage (>=6.2)", "coverage-enable-subprocess (>=1)", "flaky (>=3.7
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.9, <3.10"
-content-hash = "5d4cf27ed990de4cbdd221b31ff0a5feb11d28e698995c002a0ea5e644587ec3"
+content-hash = "ab432da52cc691573d408e7ab29c463ce6086e707654bbf9006035c247f5e2a3"
 
 [metadata.files]
 alembic = [
@@ -939,8 +939,8 @@ alembic = [
     {file = "alembic-1.8.1.tar.gz", hash = "sha256:cd0b5e45b14b706426b833f06369b9a6d5ee03f826ec3238723ce8caaf6e5ffa"},
 ]
 ata-db-models = [
-    {file = "ata-db-models-0.0.4.tar.gz", hash = "sha256:0ad16e4bdef5f08c6cbd2c627f579dde45c0eeeed6f91ef1f1dcd4a0c880afee"},
-    {file = "ata_db_models-0.0.4-py3-none-any.whl", hash = "sha256:aa24538630a879ef8fc21cd75d3a2f6e53bb58c91469b8c606f9c8bb35a7bc8a"},
+    {file = "ata-db-models-0.0.6.tar.gz", hash = "sha256:2f151940b4e36dc69860405fccd7ca61867244ea6b202428d31581bb57d71df8"},
+    {file = "ata_db_models-0.0.6-py3-none-any.whl", hash = "sha256:8b864cdfc54dbec25e38db27e1315e54ded051cf2ca78cc0ed7cd1798847fcd5"},
 ]
 attrs = [
     {file = "attrs-22.1.0-py2.py3-none-any.whl", hash = "sha256:86efa402f67bf2df34f51a335487cf46b1ec130d02b8d39fd248abfd30da551c"},
