@@ -26,6 +26,7 @@ def write_events(df: pd.DataFrame, session_factory: sessionmaker) -> int:
     # Wrap execution within a begin-commit-rollback block in the form of two
     # context managers (see: https://docs.sqlalchemy.org/en/14/orm/session_basics.html#framing-out-a-begin-commit-rollback-block)
     # TODO: Once sqlalchemy-stubs catches up to SQLAlchemy 1.4, remove the type: ignore comment below
+    # (see: https://github.com/dropbox/sqlalchemy-stubs/blob/ed9611114925f4b2aea42401217c0eacb1a564e1/sqlalchemy-stubs/orm/session.pyi#L102)
     with session_factory.begin() as session:  # type: ignore
         result = session.execute(statement)
 
