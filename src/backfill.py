@@ -20,6 +20,9 @@ from typing import List
 
 import click
 
+from src.helpers.site import SiteName
+from src.main import run_pipeline
+
 
 @click.command()
 @click.option(
@@ -29,11 +32,11 @@ import click
     help="Start date to run the backfill from.",
 )
 @click.option("--days", type=click.INT, default=1, help="How many days of data to grab after the start date.")
-@click.argument("site", type=click.Choice(["afro-la", "dallas-free-press", "open-vallejo", "the-19th"]))
-def backfill(start_date: datetime, days: int, site: str):
-    pass
-    # timestamps = get_timestamps(start_date=start_date, days=days)
+@click.argument("site", type=click.Choice([site for site in SiteName]))
+def backfill(start_date: datetime, days: int, site: SiteName):
+    timestamps = get_timestamps(start_date=start_date, days=days)
     # call function that calls the whole process; handler should call the same fn
+    run_pipeline(site_name=site, timestamps=timestamps)
 
 
 def get_timestamps(start_date: datetime, days: int) -> List[datetime]:
