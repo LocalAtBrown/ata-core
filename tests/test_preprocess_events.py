@@ -93,11 +93,13 @@ def field_site_name() -> FieldNew:
 
 
 # ---------- TESTS ----------
+@pytest.mark.unit
 def test_select_fields_relevant(df, fields_relevant) -> None:
     df = SelectFieldsRelevant(fields_relevant)(df)
     assert set(df.columns) == fields_relevant
 
 
+@pytest.mark.unit
 def test_delete_rows_empty(df, fields_required) -> None:
     df = DeleteRowsEmpty(fields_required)(df)
     # doc_height is not required, so the first row is off the hook
@@ -107,6 +109,7 @@ def test_delete_rows_empty(df, fields_required) -> None:
     assert df[[*fields_required]].isna().to_numpy().sum() == 0
 
 
+@pytest.mark.unit
 def test_delete_rows_duplicate_key(df, field_primary_key) -> None:
     df = DeleteRowsDuplicateKey(field_primary_key)(df)
     # First 2 rows should be removed
@@ -115,6 +118,7 @@ def test_delete_rows_duplicate_key(df, field_primary_key) -> None:
     assert df[field_primary_key].is_unique
 
 
+@pytest.mark.unit
 def test_convert_field_types(df, fields_int, fields_float, fields_datetime, fields_categorical) -> None:
     df = ConvertFieldTypes(fields_int, fields_float, fields_datetime, fields_categorical)(df)
 
@@ -131,6 +135,7 @@ def test_convert_field_types(df, fields_int, fields_float, fields_datetime, fiel
         assert is_categorical_dtype(df[f])
 
 
+@pytest.mark.unit
 def test_add_field_site_name(df, site_name, field_site_name) -> None:
     df = AddFieldSiteName(site_name, field_site_name)(df)
     # pd.Series.all returns True if all of its boolean values are True
