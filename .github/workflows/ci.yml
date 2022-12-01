@@ -41,7 +41,7 @@ jobs:
     - name: Install dependencies
       run: poetry config virtualenvs.create false && poetry install --no-interaction
     - name: run static type checking
-      run: mypy .
+      run: mypy
     - name: run unit tests
       run: pytest -m unit
     - name: run integration tests
