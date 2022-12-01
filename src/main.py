@@ -28,50 +28,47 @@ def handler(event, context):
 
 
 def run_pipeline(site_name: SiteName, timestamps: List[datetime], concurrency: int = 4):
+    # Fetch from S3
     s3 = boto3.resource("s3")
-
-    # Transform config
-    fields_relevant = {*FieldSnowplow}
-    fields_required = {
-        FieldSnowplow.DERIVED_TSTAMP,
-        FieldSnowplow.DOC_HEIGHT,
-        FieldSnowplow.DOMAIN_SESSIONIDX,
-        FieldSnowplow.DOMAIN_USERID,
-        FieldSnowplow.DVCE_SCREENHEIGHT,
-        FieldSnowplow.DVCE_SCREENWIDTH,
-        FieldSnowplow.EVENT_ID,
-        FieldSnowplow.EVENT_NAME,
-        FieldSnowplow.NETWORK_USERID,
-        FieldSnowplow.PAGE_URLPATH,
-    }
-    field_primary_key = FieldSnowplow.EVENT_ID
-    fields_int = {
-        FieldSnowplow.DOMAIN_SESSIONIDX,
-    }
-    fields_float = {
-        FieldSnowplow.DOC_HEIGHT,
-        FieldSnowplow.DVCE_SCREENHEIGHT,
-        FieldSnowplow.DVCE_SCREENWIDTH,
-        FieldSnowplow.PP_YOFFSET_MAX,
-    }
-    fields_datetime = {FieldSnowplow.DERIVED_TSTAMP}
-    fields_categorical = {FieldSnowplow.EVENT_NAME, FieldSnowplow.REFR_MEDIUM, FieldSnowplow.REFR_SOURCE}
-
     df = fetch_events(s3, site_name, timestamps, concurrency)
+
+    # Preprocess
     df = preprocess_events(
         df,
         preprocessors=[
-            SelectFieldsRelevant(fields_relevant),
-            DeleteRowsDuplicateKey(field_primary_key),
-            DeleteRowsEmpty(fields_required),
-            ConvertFieldTypes(fields_int, fields_float, fields_datetime, fields_categorical),
+            SelectFieldsRelevant(fields_relevant={*FieldSnowplow}),
+            DeleteRowsDuplicateKey(field_primary_key=FieldSnowplow.EVENT_ID),
+            DeleteRowsEmpty(
+                fields_required={
+                    FieldSnowplow.DERIVED_TSTAMP,
+                    FieldSnowplow.DOC_HEIGHT,
+                    FieldSnowplow.DOMAIN_SESSIONIDX,
+                    FieldSnowplow.DOMAIN_USERID,
+                    FieldSnowplow.DVCE_SCREENHEIGHT,
+                    FieldSnowplow.DVCE_SCREENWIDTH,
+                    FieldSnowplow.EVENT_ID,
+                    FieldSnowplow.EVENT_NAME,
+                    FieldSnowplow.NETWORK_USERID,
+                    FieldSnowplow.PAGE_URLPATH,
+                }
+            ),
+            ConvertFieldTypes(
+                fields_int={FieldSnowplow.DOMAIN_SESSIONIDX},
+                fields_float={
+                    FieldSnowplow.DOC_HEIGHT,
+                    FieldSnowplow.DVCE_SCREENHEIGHT,
+                    FieldSnowplow.DVCE_SCREENWIDTH,
+                    FieldSnowplow.PP_YOFFSET_MAX,
+                },
+                fields_datetime={FieldSnowplow.DERIVED_TSTAMP},
+                fields_categorical={FieldSnowplow.EVENT_NAME, FieldSnowplow.REFR_MEDIUM, FieldSnowplow.REFR_SOURCE},
+            ),
             AddFieldSiteName(site_name, field_site_name=FieldNew.SITE_NAME),
         ],
     )
 
-    # define engine
+    # Write to DB
     engine = create_engine(get_conn_string())
-    # define session
     session_factory = sessionmaker(engine)
 
     write_events(df, session_factory)
