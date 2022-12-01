@@ -41,3 +41,7 @@ def backfill(start_date: datetime, days: int, site: SiteName):
 
 def get_timestamps(start_date: datetime, days: int) -> List[datetime]:
     return [start_date + timedelta(hours=hour_diff) for hour_diff in range(days * 24)]
+
+
+if __name__ == "__main__":
+    backfill()
