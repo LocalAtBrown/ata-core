@@ -157,7 +157,11 @@ def test_convert_field_types(df, fields_int, fields_float, fields_datetime, fiel
 @pytest.mark.unit
 def test_delete_rows_duplicate_key(df, field_primary_key, field_timestamp, key_duplicate) -> None:
     df = ConvertFieldTypes(
-        fields_int=set(), fields_float=set(), fields_datetime={field_timestamp}, fields_categorical=set()
+        fields_int=set(),
+        fields_float=set(),
+        fields_datetime={field_timestamp},
+        fields_categorical=set(),
+        fields_json=set(),
     )(df)
     duplicate_timestamp_min = df[df[field_primary_key] == key_duplicate][field_timestamp].min()
 
