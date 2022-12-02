@@ -26,7 +26,7 @@ from ata_pipeline0.main import run_pipeline
 
 @click.command()
 @click.option(
-    "--start_date",
+    "--start-date",
     type=click.DateTime(),
     default=datetime.today().replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=1),
     help="Start date to run the backfill from.",

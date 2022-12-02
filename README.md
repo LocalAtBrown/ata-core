@@ -3,9 +3,15 @@ Snowplow to Redshift data processing.
 
 ## Run
 
-Since this code is containerized to run on Lambda, the main entrypoint isn't quite designed to run locally.
-However, we can build the Docker image and run it locally, then ping it to try it out locally. We can, of course,
-still test all the functions used by the main handler and run those separately (e.g. in a scratch file) if so desired.
+The code is primarily intended to be run on AWS Lambda, and there is a backfill CLI when needed.
+
+### Backfill
+To run a backfill, make sure you have AWS credentials on your machine and that you have any MFA commands run already
+as well (e.g. `aws-mfa`). Provide the target database's credentials via environment variables and run the backfill
+script for the intended partner site, a given date, and the number of days leading up to said date.
+
+Example run for `afro-la` for 7 days starting from 2022-11-20:
+`HOST=fakehost PORT=5432 USERNAME=fake PASSWORD=fake DB_NAME=fake python ata_pipeline0/backfill.py --start-date 2022-11-20 --days 7 afro-la`
 
 ### Docker
 
@@ -58,8 +64,10 @@ To update dependencies in your local environment, make changes to the `pyproject
 
 ## Tests
 
-We use [pytest](https://docs.pytest.org) to run our tests. Simply run `pytest` to run all tests or `pytest <path>` to run tests in a specific directory/file/module. You can also run `pytest -m unit` to run only unit tests, and `pytest -m integration` to run only integration tests.
-We run continuous integration (CI) via GitHub actions. We have actions to run MyPy and run the tests.
+We use [pytest](https://docs.pytest.org) to run our tests. Simply run `pytest` to run all tests or `pytest <path>`
+to run tests in a specific directory/file/module. You can also run `pytest -m unit` to run only unit tests, and 
+`pytest -m integration` to run only integration tests. We run continuous integration (CI) via GitHub actions. We have
+actions to run MyPy and run the tests.
 
 ## Deployment
 
