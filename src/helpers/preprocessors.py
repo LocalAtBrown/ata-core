@@ -98,6 +98,7 @@ class DeleteRowsDuplicateKey(Preprocessor):
         # Sort values by timestamp so the first event kept is the earliest,
         # which is most likely to be a parent (if its key doesn't already exist
         # in the DB)
+        # (see: https://snowplow.io/blog/dealing-with-duplicate-event-ids/)
         df = df.sort_values(self.field_timestamp)
         return df.drop_duplicates(subset=[self.field_primary_key], keep="first")
 
