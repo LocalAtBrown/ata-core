@@ -1,12 +1,14 @@
+import ast
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Set
+from typing import Dict, Set
 
+import numpy as np
 import pandas as pd
 
-from src.helpers.fields import FieldNew, FieldSnowplow
-from src.helpers.logging import logging
-from src.helpers.site import SiteName
+from ata_pipeline0.helpers.fields import FieldNew, FieldSnowplow
+from ata_pipeline0.helpers.logging import logging
+from ata_pipeline0.helpers.site import SiteName
 
 logger = logging.getLogger(__name__)
 
@@ -113,6 +115,7 @@ class ConvertFieldTypes(Preprocessor):
     fields_float: Set[FieldSnowplow]
     fields_datetime: Set[FieldSnowplow]
     fields_categorical: Set[FieldSnowplow]
+    fields_json: Set[FieldSnowplow]
 
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
         # Make a copy of the original so that it's not affected, but can remove
@@ -131,7 +134,18 @@ class ConvertFieldTypes(Preprocessor):
 
         df[[*self.fields_categorical]] = df[[*self.fields_categorical]].astype("category")
 
+        df = df.replace([np.nan], [None])
+
+        for field in self.fields_json:
+            df[field] = df[field].apply(self._convert_to_json)
         return df
+
+    @staticmethod
+    def _convert_to_json(value: str) -> Dict:
+        try:
+            return ast.literal_eval(value)
+        except ValueError:
+            return None  # type: ignore
 
     def log_result(self, df_in=None, df_out=None) -> None:
         logger.info("Converted field data types")

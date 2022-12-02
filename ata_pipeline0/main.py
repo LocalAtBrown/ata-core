@@ -7,18 +7,18 @@ from ata_db_models.helpers import get_conn_string
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from src.fetch_events import fetch_events
-from src.helpers.fields import FieldNew, FieldSnowplow
-from src.helpers.preprocessors import (
+from ata_pipeline0.fetch_events import fetch_events
+from ata_pipeline0.helpers.fields import FieldNew, FieldSnowplow
+from ata_pipeline0.helpers.preprocessors import (
     AddFieldSiteName,
     ConvertFieldTypes,
     DeleteRowsDuplicateKey,
     DeleteRowsEmpty,
     SelectFieldsRelevant,
 )
-from src.helpers.site import SiteName
-from src.preprocess_events import preprocess_events
-from src.write_events import write_events
+from ata_pipeline0.helpers.site import SiteName
+from ata_pipeline0.preprocess_events import preprocess_events
+from ata_pipeline0.write_events import write_events
 
 
 def handler(event, context):
@@ -62,6 +62,11 @@ def run_pipeline(site_name: SiteName, timestamps: List[datetime], concurrency: i
                 },
                 fields_datetime={FieldSnowplow.DERIVED_TSTAMP},
                 fields_categorical={FieldSnowplow.EVENT_NAME, FieldSnowplow.REFR_MEDIUM, FieldSnowplow.REFR_SOURCE},
+                fields_json={
+                    FieldSnowplow.SEMISTRUCT_FORM_CHANGE,
+                    FieldSnowplow.SEMISTRUCT_FORM_FOCUS,
+                    FieldSnowplow.SEMISTRUCT_FORM_SUBMIT,
+                },
             ),
             AddFieldSiteName(site_name, field_site_name=FieldNew.SITE_NAME),
         ],

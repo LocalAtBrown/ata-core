@@ -9,15 +9,15 @@ from pandas.api.types import (
     is_int64_dtype,
 )
 
-from src.helpers.fields import FieldNew, FieldSnowplow
-from src.helpers.preprocessors import (
+from ata_pipeline0.helpers.fields import FieldNew, FieldSnowplow
+from ata_pipeline0.helpers.preprocessors import (
     AddFieldSiteName,
     ConvertFieldTypes,
     DeleteRowsDuplicateKey,
     DeleteRowsEmpty,
     SelectFieldsRelevant,
 )
-from src.helpers.site import SiteName
+from ata_pipeline0.helpers.site import SiteName
 
 
 # ---------- FIXTURES ----------
@@ -83,6 +83,11 @@ def fields_categorical() -> Set[FieldSnowplow]:
 
 
 @pytest.fixture(scope="module")
+def fields_json() -> Set[FieldSnowplow]:
+    return {FieldSnowplow.SEMISTRUCT_FORM_CHANGE}
+
+
+@pytest.fixture(scope="module")
 def site_name() -> SiteName:
     return SiteName.AFRO_LA
 
@@ -119,8 +124,8 @@ def test_delete_rows_duplicate_key(df, field_primary_key) -> None:
 
 
 @pytest.mark.unit
-def test_convert_field_types(df, fields_int, fields_float, fields_datetime, fields_categorical) -> None:
-    df = ConvertFieldTypes(fields_int, fields_float, fields_datetime, fields_categorical)(df)
+def test_convert_field_types(df, fields_int, fields_float, fields_datetime, fields_categorical, fields_json) -> None:
+    df = ConvertFieldTypes(fields_int, fields_float, fields_datetime, fields_categorical, fields_json)(df)
 
     for f in fields_int:
         assert is_int64_dtype(df[f])

@@ -2,8 +2,8 @@ from typing import List
 
 import pandas as pd
 
-from src.helpers.logging import logging
-from src.helpers.preprocessors import Preprocessor
+from ata_pipeline0.helpers.logging import logging
+from ata_pipeline0.helpers.preprocessors import Preprocessor
 
 logger = logging.getLogger(__name__)
 

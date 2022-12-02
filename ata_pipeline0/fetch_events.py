@@ -9,8 +9,8 @@ import pandas as pd
 from mypy_boto3_s3.service_resource import ObjectSummary, S3ServiceResource
 from mypy_boto3_s3.type_defs import GetObjectOutputTypeDef
 
-from src.helpers.logging import logging
-from src.helpers.site import SiteName
+from ata_pipeline0.helpers.logging import logging
+from ata_pipeline0.helpers.site import SiteName
 
 logger = logging.getLogger(__name__)
 
