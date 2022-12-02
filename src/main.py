@@ -62,6 +62,7 @@ def run_pipeline(site_name: SiteName, timestamps: List[datetime], concurrency: i
                 fields_datetime={FieldSnowplow.DERIVED_TSTAMP},
                 fields_categorical={FieldSnowplow.EVENT_NAME, FieldSnowplow.REFR_MEDIUM, FieldSnowplow.REFR_SOURCE},
             ),
+            # This happens after converting field type because timestamps need to be in datetime format
             DeleteRowsDuplicateKey(
                 field_primary_key=FieldSnowplow.EVENT_ID, field_timestamp=FieldSnowplow.DERIVED_TSTAMP
             ),
