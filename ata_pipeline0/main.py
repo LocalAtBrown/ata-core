@@ -38,7 +38,6 @@ def run_pipeline(site_name: SiteName, timestamps: List[datetime], concurrency: i
         df,
         preprocessors=[
             SelectFieldsRelevant(fields_relevant={*FieldSnowplow}),
-            DeleteRowsDuplicateKey(field_primary_key=FieldSnowplow.EVENT_ID),
             DeleteRowsEmpty(
                 fields_required={
                     FieldSnowplow.DERIVED_TSTAMP,
@@ -68,6 +67,10 @@ def run_pipeline(site_name: SiteName, timestamps: List[datetime], concurrency: i
                     FieldSnowplow.SEMISTRUCT_FORM_FOCUS,
                     FieldSnowplow.SEMISTRUCT_FORM_SUBMIT,
                 },
+            ),
+            # This happens after converting field type because timestamps need to be in datetime format
+            DeleteRowsDuplicateKey(
+                field_primary_key=FieldSnowplow.EVENT_ID, field_timestamp=FieldSnowplow.DERIVED_TSTAMP
             ),
             AddFieldSiteName(site_name, field_site_name=FieldNew.SITE_NAME),
             ReplaceNaNs(replace_with=None),
