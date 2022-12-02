@@ -1,20 +1,3 @@
-"""
-This needs to:
-1. accept args
-  a. site
-  b. start date
-  c. end date
-
-2. fetch events from s3 (existing functionality, will need to convert from 2 datetimes to explicit specific datetimes
-so we will need a function to take 2 datetimes and grab all paths between them for the given site)
-3. process them (existing functionality)
-4. store them (being written right now)
-
-Notes:
-- Might need to batch
-- Run locally, or run on cloud? Start with local
-"""
-
 from datetime import datetime, timedelta
 from typing import List
 
