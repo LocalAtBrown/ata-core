@@ -14,6 +14,7 @@ from ata_pipeline0.helpers.preprocessors import (
     ConvertFieldTypes,
     DeleteRowsDuplicateKey,
     DeleteRowsEmpty,
+    ReplaceNaNs,
     SelectFieldsRelevant,
 )
 from ata_pipeline0.helpers.site import SiteName
@@ -69,6 +70,7 @@ def run_pipeline(site_name: SiteName, timestamps: List[datetime], concurrency: i
                 },
             ),
             AddFieldSiteName(site_name, field_site_name=FieldNew.SITE_NAME),
+            ReplaceNaNs(replace_with=None),
         ],
     )
 

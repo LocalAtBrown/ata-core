@@ -15,6 +15,7 @@ from ata_pipeline0.helpers.preprocessors import (
     ConvertFieldTypes,
     DeleteRowsDuplicateKey,
     DeleteRowsEmpty,
+    ReplaceNaNs,
     SelectFieldsRelevant,
 )
 from ata_pipeline0.helpers.site import SiteName
@@ -29,10 +30,10 @@ def df() -> pd.DataFrame:
     """
     return pd.DataFrame(
         [
-            ["A0", "1", "1500", None, "2022-11-01T00:00:01.051Z", "page_ping"],
-            ["A0", "1", None, "400", "2022-11-02T00:00:01.051Z", "submit_form"],
-            ["B1", "2", "2000", "200", "2022-12-01T00:00:01.051Z", "focus_form"],
-            ["C2", "1", "1500", "400", None, None],
+            ["A0", "1", "1500", None, "2022-11-01T00:00:01.051Z", "page_ping", None],
+            ["A0", "1", None, "400", "2022-11-02T00:00:01.051Z", "submit_form", "{'field': 'value'}"],
+            ["B1", "2", "2000", "200", "2022-12-01T00:00:01.051Z", "focus_form", None],
+            ["C2", "1", "1500", "400", None, None, None],
         ],
         columns=[
             FieldSnowplow.EVENT_ID,
@@ -41,6 +42,7 @@ def df() -> pd.DataFrame:
             FieldSnowplow.PP_YOFFSET_MAX,
             FieldSnowplow.DERIVED_TSTAMP,
             FieldSnowplow.EVENT_NAME,
+            FieldSnowplow.SEMISTRUCT_FORM_FOCUS,
         ],
     )
 
@@ -84,7 +86,7 @@ def fields_categorical() -> Set[FieldSnowplow]:
 
 @pytest.fixture(scope="module")
 def fields_json() -> Set[FieldSnowplow]:
-    return {FieldSnowplow.SEMISTRUCT_FORM_CHANGE}
+    return {FieldSnowplow.SEMISTRUCT_FORM_FOCUS}
 
 
 @pytest.fixture(scope="module")
@@ -95,6 +97,11 @@ def site_name() -> SiteName:
 @pytest.fixture(scope="module")
 def field_site_name() -> FieldNew:
     return FieldNew.SITE_NAME
+
+
+@pytest.fixture(scope="module")
+def replace_with() -> str:
+    return "woo"
 
 
 # ---------- TESTS ----------
@@ -125,7 +132,13 @@ def test_delete_rows_duplicate_key(df, field_primary_key) -> None:
 
 @pytest.mark.unit
 def test_convert_field_types(df, fields_int, fields_float, fields_datetime, fields_categorical, fields_json) -> None:
-    df = ConvertFieldTypes(fields_int, fields_float, fields_datetime, fields_categorical, fields_json)(df)
+    df = ConvertFieldTypes(
+        fields_int=fields_int,
+        fields_float=fields_float,
+        fields_datetime=fields_datetime,
+        fields_categorical=fields_categorical,
+        fields_json=fields_json,
+    )(df)
 
     for f in fields_int:
         assert is_int64_dtype(df[f])
@@ -145,3 +158,10 @@ def test_add_field_site_name(df, site_name, field_site_name) -> None:
     df = AddFieldSiteName(site_name, field_site_name)(df)
     # pd.Series.all returns True if all of its boolean values are True
     assert (df[field_site_name] == site_name).all()
+
+
+@pytest.mark.unit
+def test_replace_nans(df, replace_with) -> None:
+    df = ReplaceNaNs(replace_with)(df)
+    df_check = df.dropna()
+    assert df.shape == df_check.shape
