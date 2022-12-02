@@ -22,15 +22,20 @@ from src.helpers.site import SiteName
 
 # ---------- FIXTURES ----------
 @pytest.fixture(scope="module")
-def df() -> pd.DataFrame:
+def key_duplicate() -> str:
+    return "A0"
+
+
+@pytest.fixture(scope="module")
+def df(key_duplicate) -> pd.DataFrame:
     """
     Creates a dummy events DataFrame for testing purposes. It doesn't reflect
     real data by any means.
     """
     return pd.DataFrame(
         [
-            ["A0", "1", "1500", None, "2022-11-01T00:00:01.051Z", "page_ping"],
-            ["A0", "1", None, "400", "2022-11-02T00:00:01.051Z", "submit_form"],
+            [key_duplicate, "1", "1500", None, "2022-11-02T00:00:01.051Z", "page_ping"],
+            [key_duplicate, "1", None, "400", "2022-11-01T00:00:01.051Z", "submit_form"],
             ["B1", "2", "2000", "200", "2022-12-01T00:00:01.051Z", "focus_form"],
             ["C2", "1", "1500", "400", None, None],
         ],
@@ -60,6 +65,11 @@ def fields_required() -> Set[FieldSnowplow]:
 @pytest.fixture(scope="module")
 def field_primary_key() -> FieldSnowplow:
     return FieldSnowplow.EVENT_ID
+
+
+@pytest.fixture(scope="module")
+def field_timestamp() -> FieldSnowplow:
+    return FieldSnowplow.DERIVED_TSTAMP
 
 
 @pytest.fixture(scope="module")
@@ -110,15 +120,6 @@ def test_delete_rows_empty(df, fields_required) -> None:
 
 
 @pytest.mark.unit
-def test_delete_rows_duplicate_key(df, field_primary_key) -> None:
-    df = DeleteRowsDuplicateKey(field_primary_key)(df)
-    # First 2 rows should be removed
-    assert df.shape[0] == 2
-    # Check primary key uniqueness
-    assert df[field_primary_key].is_unique
-
-
-@pytest.mark.unit
 def test_convert_field_types(df, fields_int, fields_float, fields_datetime, fields_categorical) -> None:
     df = ConvertFieldTypes(fields_int, fields_float, fields_datetime, fields_categorical)(df)
 
@@ -133,6 +134,28 @@ def test_convert_field_types(df, fields_int, fields_float, fields_datetime, fiel
 
     for f in fields_categorical:
         assert is_categorical_dtype(df[f])
+
+
+@pytest.mark.unit
+def test_delete_rows_duplicate_key(df, field_primary_key, field_timestamp, key_duplicate) -> None:
+    df = ConvertFieldTypes(
+        fields_int=set(), fields_float=set(), fields_datetime={field_timestamp}, fields_categorical=set()
+    )(df)
+    duplicate_timestamp_min = df[df[field_primary_key] == key_duplicate][field_timestamp].min()
+
+    df = DeleteRowsDuplicateKey(field_primary_key, field_timestamp)(df)
+
+    # 1 row (second row) should be removed
+    assert df.shape[0] == 3
+
+    # Remaining event with duplicated key should have the earliest timestamp
+    # so that it's most likely to be an actual/parent event
+    assert df[df[field_primary_key] == key_duplicate][field_timestamp].shape[0] == 1
+    deduped_timestamp = df[df[field_primary_key] == key_duplicate][field_timestamp].iloc[0]
+    assert deduped_timestamp == duplicate_timestamp_min
+
+    # Check primary key uniqueness
+    assert df[field_primary_key].is_unique
 
 
 @pytest.mark.unit

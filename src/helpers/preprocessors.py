@@ -92,9 +92,14 @@ class DeleteRowsDuplicateKey(Preprocessor):
     """
 
     field_primary_key: FieldSnowplow
+    field_timestamp: FieldSnowplow
 
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
-        return df.drop_duplicates(subset=[self.field_primary_key], keep=False)
+        # Sort values by timestamp so the first event kept is the earliest,
+        # which is most likely to be a parent (if its key doesn't already exist
+        # in the DB)
+        df = df.sort_values(self.field_timestamp)
+        return df.drop_duplicates(subset=[self.field_primary_key], keep="first")
 
     def log_result(self, df_in: pd.DataFrame, df_out: pd.DataFrame) -> None:
         logger.info(
