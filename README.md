@@ -8,7 +8,7 @@ The code is primarily intended to be run on AWS Lambda, and there is a backfill 
 ### Backfill
 To run a backfill, make sure you have AWS credentials on your machine and that you have any MFA commands run already
 as well (e.g. `aws-mfa`). Provide the target database's credentials via environment variables and run the backfill
-script for the intended partner site, a given date, and the number of days leading up to said date.
+script for the intended partner site, a given date, and the number of days starting from said date.
 
 Example run for `afro-la` for 7 days starting from 2022-11-20:
 `HOST=fakehost PORT=5432 USERNAME=fake PASSWORD=fake DB_NAME=fake python ata_pipeline0/backfill.py --start-date 2022-11-20 --days 7 afro-la`
