@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta
-from typing import List
 
 import click
 
+from ata_pipeline0.helpers.datetime import get_timestamps
 from ata_pipeline0.helpers.site import SiteName
 from ata_pipeline0.main import run_pipeline
 
@@ -20,10 +20,6 @@ def backfill(start_date: datetime, days: int, site: SiteName):
     timestamps = get_timestamps(start_date=start_date, days=days)
     # call function that calls the whole process; handler should call the same fn
     run_pipeline(site_name=site, timestamps=timestamps)
-
-
-def get_timestamps(start_date: datetime, days: int) -> List[datetime]:
-    return [start_date + timedelta(hours=hour_diff) for hour_diff in range(days * 24)]
 
 
 if __name__ == "__main__":
