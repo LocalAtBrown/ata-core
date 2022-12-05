@@ -190,8 +190,6 @@ class ReplaceNaNs(Preprocessor):
     replace_with: Any
 
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
-        df = df.copy()
-
         df = df.replace([np.nan], [self.replace_with])
 
         return df
