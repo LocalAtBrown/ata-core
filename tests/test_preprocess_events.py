@@ -9,15 +9,16 @@ from pandas.api.types import (
     is_int64_dtype,
 )
 
-from src.helpers.fields import FieldNew, FieldSnowplow
-from src.helpers.preprocessors import (
+from ata_pipeline0.helpers.fields import FieldNew, FieldSnowplow
+from ata_pipeline0.helpers.preprocessors import (
     AddFieldSiteName,
     ConvertFieldTypes,
     DeleteRowsDuplicateKey,
     DeleteRowsEmpty,
+    ReplaceNaNs,
     SelectFieldsRelevant,
 )
-from src.helpers.site import SiteName
+from ata_pipeline0.helpers.site import SiteName
 
 
 # ---------- FIXTURES ----------
@@ -34,10 +35,10 @@ def df(key_duplicate) -> pd.DataFrame:
     """
     return pd.DataFrame(
         [
-            [key_duplicate, "1", "1500", None, "2022-11-02T00:00:01.051Z", "page_ping"],
-            [key_duplicate, "1", None, "400", "2022-11-01T00:00:01.051Z", "submit_form"],
-            ["B1", "2", "2000", "200", "2022-12-01T00:00:01.051Z", "focus_form"],
-            ["C2", "1", "1500", "400", None, None],
+            [key_duplicate, "1", "1500", None, "2022-11-02T00:00:01.051Z", "page_ping", None],
+            [key_duplicate, "1", None, "400", "2022-11-01T00:00:01.051Z", "submit_form", "{'field': 'value'}"],
+            ["B1", "2", "2000", "200", "2022-12-01T00:00:01.051Z", "focus_form", None],
+            ["C2", "1", "1500", "400", None, None, None],
         ],
         columns=[
             FieldSnowplow.EVENT_ID,
@@ -46,6 +47,7 @@ def df(key_duplicate) -> pd.DataFrame:
             FieldSnowplow.PP_YOFFSET_MAX,
             FieldSnowplow.DERIVED_TSTAMP,
             FieldSnowplow.EVENT_NAME,
+            FieldSnowplow.SEMISTRUCT_FORM_FOCUS,
         ],
     )
 
@@ -93,6 +95,11 @@ def fields_categorical() -> Set[FieldSnowplow]:
 
 
 @pytest.fixture(scope="module")
+def fields_json() -> Set[FieldSnowplow]:
+    return {FieldSnowplow.SEMISTRUCT_FORM_FOCUS}
+
+
+@pytest.fixture(scope="module")
 def site_name() -> SiteName:
     return SiteName.AFRO_LA
 
@@ -100,6 +107,11 @@ def site_name() -> SiteName:
 @pytest.fixture(scope="module")
 def field_site_name() -> FieldNew:
     return FieldNew.SITE_NAME
+
+
+@pytest.fixture(scope="module")
+def replace_with() -> str:
+    return "woo"
 
 
 # ---------- TESTS ----------
@@ -120,8 +132,14 @@ def test_delete_rows_empty(df, fields_required) -> None:
 
 
 @pytest.mark.unit
-def test_convert_field_types(df, fields_int, fields_float, fields_datetime, fields_categorical) -> None:
-    df = ConvertFieldTypes(fields_int, fields_float, fields_datetime, fields_categorical)(df)
+def test_convert_field_types(df, fields_int, fields_float, fields_datetime, fields_categorical, fields_json) -> None:
+    df = ConvertFieldTypes(
+        fields_int=fields_int,
+        fields_float=fields_float,
+        fields_datetime=fields_datetime,
+        fields_categorical=fields_categorical,
+        fields_json=fields_json,
+    )(df)
 
     for f in fields_int:
         assert is_int64_dtype(df[f])
@@ -139,7 +157,11 @@ def test_convert_field_types(df, fields_int, fields_float, fields_datetime, fiel
 @pytest.mark.unit
 def test_delete_rows_duplicate_key(df, field_primary_key, field_timestamp, key_duplicate) -> None:
     df = ConvertFieldTypes(
-        fields_int=set(), fields_float=set(), fields_datetime={field_timestamp}, fields_categorical=set()
+        fields_int=set(),
+        fields_float=set(),
+        fields_datetime={field_timestamp},
+        fields_categorical=set(),
+        fields_json=set(),
     )(df)
     duplicate_timestamp_min = df[df[field_primary_key] == key_duplicate][field_timestamp].min()
 
@@ -163,3 +185,10 @@ def test_add_field_site_name(df, site_name, field_site_name) -> None:
     df = AddFieldSiteName(site_name, field_site_name)(df)
     # pd.Series.all returns True if all of its boolean values are True
     assert (df[field_site_name] == site_name).all()
+
+
+@pytest.mark.unit
+def test_replace_nans(df, replace_with) -> None:
+    df = ReplaceNaNs(replace_with)(df)
+    df_check = df.dropna()
+    assert df.shape == df_check.shape

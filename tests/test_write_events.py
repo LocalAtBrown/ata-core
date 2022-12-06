@@ -9,10 +9,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import sessionmaker
 
-from src.helpers.fields import FieldNew, FieldSnowplow
-from src.helpers.preprocessors import ConvertFieldTypes
-from src.helpers.site import SiteName
-from src.write_events import write_events
+from ata_pipeline0.helpers.fields import FieldNew, FieldSnowplow
+from ata_pipeline0.helpers.preprocessors import ConvertFieldTypes
+from ata_pipeline0.helpers.site import SiteName
+from ata_pipeline0.write_events import write_events
 
 
 # ---------- FIXTURES ----------
@@ -120,6 +120,11 @@ def df() -> pd.DataFrame:
         },
         fields_datetime={FieldSnowplow.DERIVED_TSTAMP},
         fields_categorical={FieldSnowplow.EVENT_NAME, FieldSnowplow.REFR_MEDIUM, FieldSnowplow.REFR_SOURCE},
+        fields_json={
+            FieldSnowplow.SEMISTRUCT_FORM_CHANGE,
+            FieldSnowplow.SEMISTRUCT_FORM_FOCUS,
+            FieldSnowplow.SEMISTRUCT_FORM_SUBMIT,
+        },
     )(df)
 
     return df

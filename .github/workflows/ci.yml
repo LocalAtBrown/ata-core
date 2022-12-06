@@ -4,7 +4,7 @@ on:
     branches:
       - main
     paths:
-      - 'src/**'
+      - 'ata_pipeline0/**'
       - 'tests/**'
       - '.github/workflows/ci.yaml'
 jobs:

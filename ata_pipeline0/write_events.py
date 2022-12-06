@@ -3,7 +3,7 @@ from ata_db_models.models import Event
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import sessionmaker
 
-from src.helpers.logging import logging
+from ata_pipeline0.helpers.logging import logging
 
 logger = logging.getLogger(__name__)
 
