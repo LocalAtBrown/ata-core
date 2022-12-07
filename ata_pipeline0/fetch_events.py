@@ -3,7 +3,7 @@ import itertools
 import json
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 import pandas as pd
 from mypy_boto3_s3.service_resource import ObjectSummary, S3ServiceResource
@@ -16,7 +16,11 @@ logger = logging.getLogger(__name__)
 
 
 def fetch_events(
-    s3_resource: S3ServiceResource, site_name: SiteName, timestamps: List[datetime], num_concurrent_downloads: int
+    s3_resource: S3ServiceResource,
+    site_name: SiteName,
+    num_concurrent_downloads: int,
+    timestamps: Optional[List[datetime]] = None,
+    object_key: Optional[str] = None,
 ) -> pd.DataFrame:
     """
     Given config inputs, including a site's bucket name and a list of date-hour
@@ -30,11 +34,16 @@ def fetch_events(
     # Grab S3 bucket
     bucket = s3_resource.Bucket(f"lnl-snowplow-{site_name}")
 
-    # Get a list of summaries of S3 objects to fetch
-    object_summaries_by_timestamp = [
-        bucket.objects.filter(Prefix=f"enriched/good/{ts.strftime('%Y/%m/%d/%H')}") for ts in timestamps
-    ]
-    object_summaries = itertools.chain(*object_summaries_by_timestamp)
+    # Get S3 objects to fetch
+    if object_key:
+        object_summaries = itertools.chain(*[bucket.objects.filter(Prefix=object_key)])
+    elif timestamps:
+        object_summaries_by_timestamp = [
+            bucket.objects.filter(Prefix=f"enriched/good/{ts.strftime('%Y/%m/%d/%H')}") for ts in timestamps
+        ]
+        object_summaries = itertools.chain(*object_summaries_by_timestamp)
+    else:
+        raise ValueError("Need to provide either timestamps or object_key to fetch_events")
 
     # Spread fetching tasks over a number of CPU threads. Until aioboto3 is
     # thoroughly documented and isn't a pain to work with (or until boto3
