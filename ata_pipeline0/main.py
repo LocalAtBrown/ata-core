@@ -28,7 +28,6 @@ def handler(event, context):
     site_name = re.findall("lnl-snowplow-(.*)", bucket_name)[0]
     object_key = event["Records"][0]["s3"]["object"]["key"]
     run_pipeline(site_name=site_name, object_key=object_key, concurrency=1)
-    return {"hi": "there"}
 
 
 def run_pipeline(
