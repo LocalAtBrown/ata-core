@@ -5,6 +5,7 @@ RUN pip install poetry && poetry export --without-hashes -o requirements.txt
 
 FROM public.ecr.aws/lambda/python:3.9 as runner
 COPY --from=req requirements.txt  .
+RUN yum update -y && yum install postgresql-devel gcc -y
 RUN  pip3 install -r requirements.txt --target "${LAMBDA_TASK_ROOT}"
 COPY /ata_pipeline0/ ${LAMBDA_TASK_ROOT}/ata_pipeline0
 # Set the CMD to your handler (could also be done as a parameter override outside of the Dockerfile)
