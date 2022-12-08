@@ -24,6 +24,7 @@ from ata_pipeline0.write_events import write_events
 
 def handler(event, context):
     # Note: this is invoked by an event-driven, async method (s3 trigger) so the return value is discarded
+    # see here for example event structure: https://docs.aws.amazon.com/AmazonS3/latest/userguide/notification-content-structure.html
     bucket_name = event["Records"][0]["s3"]["bucket"]["name"]
     site_name = re.findall("lnl-snowplow-(.*)", bucket_name)[0]
     object_key = event["Records"][0]["s3"]["object"]["key"]
