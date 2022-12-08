@@ -1,6 +1,6 @@
-import json
+import re
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 import boto3
 from ata_db_models.helpers import get_conn_string
@@ -24,14 +24,28 @@ from ata_pipeline0.write_events import write_events
 
 def handler(event, context):
     # Note: this is invoked by an event-driven, async method (s3 trigger) so the return value is discarded
-    print("request: {}".format(json.dumps(event)))
-    return {"hi": "there"}
+    # see here for example event structure: https://docs.aws.amazon.com/AmazonS3/latest/userguide/notification-content-structure.html
+    bucket_name = event["Records"][0]["s3"]["bucket"]["name"]
+    site_name = SiteName(re.findall("lnl-snowplow-(.*)", bucket_name)[0])
+    object_key = event["Records"][0]["s3"]["object"]["key"]
+    run_pipeline(site_name=site_name, object_key=object_key, concurrency=1)
 
 
-def run_pipeline(site_name: SiteName, timestamps: List[datetime], concurrency: int = 4):
+def run_pipeline(
+    site_name: SiteName,
+    timestamps: Optional[List[datetime]] = None,
+    object_key: Optional[str] = None,
+    concurrency: int = 4,
+):
     # Fetch from S3
     s3 = boto3.resource("s3")
-    df = fetch_events(s3, site_name, timestamps, concurrency)
+    df = fetch_events(
+        s3_resource=s3,
+        site_name=site_name,
+        timestamps=timestamps,
+        object_key=object_key,
+        num_concurrent_downloads=concurrency,
+    )
 
     # Preprocess
     df = preprocess_events(
