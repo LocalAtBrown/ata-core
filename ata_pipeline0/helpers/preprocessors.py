@@ -5,6 +5,7 @@ from typing import Any, Dict, Set
 
 import numpy as np
 import pandas as pd
+import user_agents as ua
 
 from ata_pipeline0.helpers.fields import FieldNew, FieldSnowplow
 from ata_pipeline0.helpers.logging import logging
@@ -108,6 +109,21 @@ class DeleteRowsDuplicateKey(Preprocessor):
         logger.info(
             f"Deleted {df_in.shape[0] - df_out.shape[0]} rows with duplicate {self.field_primary_key} from staged DataFrame"
         )
+
+
+@dataclass
+class DeleteRowsBot(Preprocessor):
+    """
+    Delete all rows where the event is made by a bot.
+    """
+
+    field_useragent: FieldSnowplow
+
+    def transform(self, df: pd.DataFrame) -> pd.DataFrame:
+        return df[df[self.field_useragent].apply(lambda x: not ua.parse(x).is_bot)]
+
+    def log_result(self, df_in: pd.DataFrame, df_out: pd.DataFrame) -> None:
+        logger.info(f"Deleted {df_in.shape[0] - df_out.shape[0]} rows whose event is made by a bot")
 
 
 @dataclass

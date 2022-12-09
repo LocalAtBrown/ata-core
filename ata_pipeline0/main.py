@@ -12,6 +12,7 @@ from ata_pipeline0.helpers.fields import FieldNew, FieldSnowplow
 from ata_pipeline0.helpers.preprocessors import (
     AddFieldSiteName,
     ConvertFieldTypes,
+    DeleteRowsBot,
     DeleteRowsDuplicateKey,
     DeleteRowsEmpty,
     ReplaceNaNs,
@@ -86,6 +87,7 @@ def run_pipeline(
             DeleteRowsDuplicateKey(
                 field_primary_key=FieldSnowplow.EVENT_ID, field_timestamp=FieldSnowplow.DERIVED_TSTAMP
             ),
+            DeleteRowsBot(field_useragent=FieldSnowplow.USERAGENT),
             AddFieldSiteName(site_name, field_site_name=FieldNew.SITE_NAME),
             ReplaceNaNs(replace_with=None),
         ],

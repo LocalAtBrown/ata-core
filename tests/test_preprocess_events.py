@@ -2,6 +2,7 @@ from typing import Set
 
 import pandas as pd
 import pytest
+import user_agents as ua
 from pandas.api.types import (
     is_categorical_dtype,
     is_datetime64_ns_dtype,
@@ -13,6 +14,7 @@ from ata_pipeline0.helpers.fields import FieldNew, FieldSnowplow
 from ata_pipeline0.helpers.preprocessors import (
     AddFieldSiteName,
     ConvertFieldTypes,
+    DeleteRowsBot,
     DeleteRowsDuplicateKey,
     DeleteRowsEmpty,
     ReplaceNaNs,
@@ -35,10 +37,46 @@ def df(key_duplicate) -> pd.DataFrame:
     """
     return pd.DataFrame(
         [
-            [key_duplicate, "1", "1500", None, "2022-11-02T00:00:01.051Z", "page_ping", None],
-            [key_duplicate, "1", None, "400", "2022-11-01T00:00:01.051Z", "submit_form", "{'field': 'value'}"],
-            ["B1", "2", "2000", "200", "2022-12-01T00:00:01.051Z", "focus_form", None],
-            ["C2", "1", "1500", "400", None, None, None],
+            [
+                key_duplicate,
+                "1",
+                "1500",
+                None,
+                "2022-11-02T00:00:01.051Z",
+                "page_ping",
+                None,
+                "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.5249.119 Mobile Safari/537.36 (compatible; Googlebot/2.1;  http://www.google.com/bot.html)",  # this is a bot
+            ],
+            [
+                key_duplicate,
+                "1",
+                None,
+                "400",
+                "2022-11-01T00:00:01.051Z",
+                "submit_form",
+                "{'field': 'value'}",
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36",  # this is NOT a bot
+            ],
+            [
+                "B1",
+                "2",
+                "2000",
+                "200",
+                "2022-12-01T00:00:01.051Z",
+                "focus_form",
+                None,
+                "Mozilla/5.0 (Linux; Android 11; 5087Z Build/RP1A.200720.011; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/107.0.5304.105 Mobile Safari/537.36",  # this is NOT a bot
+            ],
+            [
+                "C2",
+                "1",
+                "1500",
+                "400",
+                None,
+                None,
+                None,
+                "Mozilla/5.0 (iPhone; CPU iPhone OS 16_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",  # this is NOT a bot
+            ],
         ],
         columns=[
             FieldSnowplow.EVENT_ID,
@@ -48,6 +86,7 @@ def df(key_duplicate) -> pd.DataFrame:
             FieldSnowplow.DERIVED_TSTAMP,
             FieldSnowplow.EVENT_NAME,
             FieldSnowplow.SEMISTRUCT_FORM_FOCUS,
+            FieldSnowplow.USERAGENT,
         ],
     )
 
@@ -72,6 +111,11 @@ def field_primary_key() -> FieldSnowplow:
 @pytest.fixture(scope="module")
 def field_timestamp() -> FieldSnowplow:
     return FieldSnowplow.DERIVED_TSTAMP
+
+
+@pytest.fixture(scope="module")
+def field_useragent() -> FieldSnowplow:
+    return FieldSnowplow.USERAGENT
 
 
 @pytest.fixture(scope="module")
@@ -178,6 +222,15 @@ def test_delete_rows_duplicate_key(df, field_primary_key, field_timestamp, key_d
 
     # Check primary key uniqueness
     assert df[field_primary_key].is_unique
+
+
+@pytest.mark.unit
+def test_delete_fields_bot(df, field_useragent) -> None:
+    df = DeleteRowsBot(field_useragent)(df)
+    # Only first row should be removed
+    assert df.shape[0] == 3
+    # All other rows should be non-bot events
+    assert df[field_useragent].apply(lambda x: ua.parse(x).is_bot).sum() == 0
 
 
 @pytest.mark.unit
