@@ -1,11 +1,9 @@
-from __future__ import annotations
-
-from abc import ABC, abstractmethod
+import functools
+from abc import ABC
 from dataclasses import dataclass
 from enum import Enum
-from typing import List, Optional
+from typing import Callable, List, Optional, cast
 
-import numpy as np
 import pandas as pd
 
 from ata_pipeline0.helpers.fields import FieldSnowplow
@@ -23,13 +21,6 @@ class SiteName(str, Enum):
 
 
 @dataclass
-class FormSubmitData:
-    form_id: str
-    form_classes: List[str]
-    elements: List[FormElement]
-
-
-@dataclass
 class FormElement:
     name: str
     node_name: str
@@ -38,27 +29,49 @@ class FormElement:
 
 
 @dataclass
+class FormSubmitData:
+    form_id: str
+    form_classes: List[str]
+    elements: List[FormElement]
+
+
+@dataclass
 class Site(ABC):
     name: SiteName
 
     @staticmethod
+    @functools.cache
     def parse_form_submit_data(data: dict) -> FormSubmitData:
+        """
+        TODO docs
+        """
         return FormSubmitData(
             form_id=data["formId"], form_classes=data["formClasses"], elements=[FormElement(*e) for e in data["elements"]]
         )
 
-    @abstractmethod
-    def check_form_submit_is_newsletter(self, event: pd.Series) -> bool:
-        form_data_raw = event[FieldSnowplow.SEMISTRUCT_FORM_SUBMIT]
+    @staticmethod
+    def verify_newsletter_form_submit_nonempty_data(event: pd.Series) -> bool:
+        """
+        TODO docs
+        """
+        # Should only be either dict or None because we'll perform this check
+        # after the ConvertFieldTypes and ReplaceNaNs preprocessors
+        form_data_raw = cast(Optional[dict], event[FieldSnowplow.SEMISTRUCT_FORM_SUBMIT])
+        return form_data_raw is not None
 
-        # If form data is missing/null, not a newsletter
-        if not form_data_raw or np.isnan(form_data_raw):
-            return False
+    def verify_newsletter_form_submit_has_email_input(self, event: pd.Series) -> bool:
+        """
+        TODO docs
+        """
+        form_data = self.parse_form_submit_data(event[FieldSnowplow.SEMISTRUCT_FORM_SUBMIT])
+        return any([e.node_name == "INPUT" and e.type == "email" for e in form_data.elements])
 
-        form_data = self.parse_form_submit_data(form_data_raw)
+    @property
+    def newsletter_form_submit_verifiers(self) -> List[Callable[[pd.Series], bool]]:
+        return [self.verify_newsletter_form_submit_nonempty_data, self.verify_newsletter_form_submit_has_email_input]
 
-        # If form
-        if not any([e.node_name == "INPUT" and e.type == "email" for e in form_data.elements]):
-            return False
-
-        return True
+    def verify_newsletter_form_submit(self, event: pd.Series) -> bool:
+        """
+        TODO docs
+        """
+        return all([verify(event) for verify in self.newsletter_form_submit_verifiers])
