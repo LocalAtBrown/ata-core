@@ -54,7 +54,8 @@ exclude = [
 
 
 [[tool.mypy.overrides]]
-module = ["ata_db_models.models", "ata_db_models.helpers"]
+# Remove any of these packages from below list once its type stubs are available
+module = ["ata_db_models", "user_agents"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
