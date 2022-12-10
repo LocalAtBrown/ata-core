@@ -37,21 +37,22 @@ class FormSubmitData:
     elements: List[FormElement]
 
 
+@functools.cache
+def parse_form_submit_dict(data: dict) -> FormSubmitData:
+    """
+    Creates a form-data dataclass from a corresponding dict.
+    """
+    return FormSubmitData(
+        form_id=data["formId"], form_classes=data["formClasses"], elements=[FormElement(*e) for e in data["elements"]]
+    )
+
+
+# ---------- SITE NEWSLETTER-FORM-SUBMISSION VERIFIERS ----------
 class SiteNewsletterFormVerifier(ABC):
     """
     Base class storing common newsletter-form-submission verifiers across all of our
     partners.
     """
-
-    @staticmethod
-    @functools.cache
-    def parse_dict(data: dict) -> FormSubmitData:
-        """
-        Creates a form-data dataclass from a corresponding dict.
-        """
-        return FormSubmitData(
-            form_id=data["formId"], form_classes=data["formClasses"], elements=[FormElement(*e) for e in data["elements"]]
-        )
 
     @staticmethod
     def has_nonempty_data(event: pd.Series) -> bool:
@@ -63,12 +64,13 @@ class SiteNewsletterFormVerifier(ABC):
         form_data_raw = cast(Optional[dict], event[FieldSnowplow.SEMISTRUCT_FORM_SUBMIT])
         return form_data_raw is not None
 
-    def has_email_input(self, event: pd.Series) -> bool:
+    @staticmethod
+    def has_email_input(event: pd.Series) -> bool:
         """
         Checks if the HTML form of a form-submission event has an `<input type="email">`
         element, which is the case in all of our partners' newsletter forms.
         """
-        form_data = self.parse_dict(event[FieldSnowplow.SEMISTRUCT_FORM_SUBMIT])
+        form_data = parse_form_submit_dict(event[FieldSnowplow.SEMISTRUCT_FORM_SUBMIT])
         return any([e.node_name == "INPUT" and e.type == "email" for e in form_data.elements])
 
     @property
