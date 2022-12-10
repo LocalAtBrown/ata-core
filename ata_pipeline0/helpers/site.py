@@ -37,6 +37,10 @@ class FormSubmitData:
 
 @dataclass
 class Site(ABC):
+    """
+    TODO docs
+    """
+
     name: SiteName
 
     @staticmethod
@@ -81,3 +85,19 @@ class Site(ABC):
         list of individual verifiers. If one verifier fails, it automatically fails.
         """
         return all([verify(event) for verify in self.newsletter_form_submit_verifiers])
+
+
+class AfroLA(Site):
+    """
+    TODO docs
+    """
+
+    name = SiteName.AFRO_LA
+
+    @staticmethod
+    def verify_newsletter_form_correct_urlpath(event: pd.Series) -> bool:
+        return event[FieldSnowplow.PAGE_URLPATH] == "/subscribe"
+
+    @property
+    def newsletter_form_submit_verifiers(self) -> List[Callable[[pd.Series], bool]]:
+        return [*super().newsletter_form_submit_verifiers, self.verify_newsletter_form_correct_urlpath]
