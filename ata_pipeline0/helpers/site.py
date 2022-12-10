@@ -9,6 +9,7 @@ import pandas as pd
 from ata_pipeline0.helpers.fields import FieldSnowplow
 
 
+# ---------- SITE NAMES ----------
 class SiteName(str, Enum):
     """
     Enum of partner slugs corresponding to the S3 buckets
@@ -20,6 +21,7 @@ class SiteName(str, Enum):
     THE_19TH = "the-19th"
 
 
+# ---------- SITE FORM-SUBMISSION EVENT UTILITIES ----------
 @dataclass
 class FormElement:
     name: str
@@ -35,17 +37,15 @@ class FormSubmitData:
     elements: List[FormElement]
 
 
-@dataclass
-class Site(ABC):
+class SiteNewsletterFormVerifier(ABC):
     """
-    TODO docs
+    Base class storing common newsletter-form-submission verifiers across all of our
+    partners.
     """
-
-    name: SiteName
 
     @staticmethod
     @functools.cache
-    def parse_form_submit_data(data: dict) -> FormSubmitData:
+    def parse_dict(data: dict) -> FormSubmitData:
         """
         Creates a form-data dataclass from a corresponding dict.
         """
@@ -54,7 +54,7 @@ class Site(ABC):
         )
 
     @staticmethod
-    def verify_newsletter_form_submit_nonempty_data(event: pd.Series) -> bool:
+    def has_nonempty_data(event: pd.Series) -> bool:
         """
         Checks if a form-submission event actually has form HTML data.
         """
@@ -63,41 +63,64 @@ class Site(ABC):
         form_data_raw = cast(Optional[dict], event[FieldSnowplow.SEMISTRUCT_FORM_SUBMIT])
         return form_data_raw is not None
 
-    def verify_newsletter_form_submit_has_email_input(self, event: pd.Series) -> bool:
+    def has_email_input(self, event: pd.Series) -> bool:
         """
         Checks if the HTML form of a form-submission event has an `<input type="email">`
         element, which is the case in all of our partners' newsletter forms.
         """
-        form_data = self.parse_form_submit_data(event[FieldSnowplow.SEMISTRUCT_FORM_SUBMIT])
+        form_data = self.parse_dict(event[FieldSnowplow.SEMISTRUCT_FORM_SUBMIT])
         return any([e.node_name == "INPUT" and e.type == "email" for e in form_data.elements])
 
     @property
-    def newsletter_form_submit_verifiers(self) -> List[Callable[[pd.Series], bool]]:
+    def verifiers(self) -> List[Callable[[pd.Series], bool]]:
         """
-        List of verifiers used to check if a form-submission event is of a newsletter form.
-        It's supposed (but not required) to be extended (or superseded) by child classes of `Site`.
+        List of individual verifiers used to check if a form-submission event is of a newsletter form.
+        It's supposed (but not required) to be extended (or superseded) by child classes of `SiteNewsletterFormVerifier`.
         """
-        return [self.verify_newsletter_form_submit_nonempty_data, self.verify_newsletter_form_submit_has_email_input]
+        return [self.has_nonempty_data, self.has_email_input]
 
-    def verify_newsletter_form_submit(self, event: pd.Series) -> bool:
+    def verify(self, event: pd.Series) -> bool:
         """
+        Main verification method.
+
         Checks if a form-submission event is of a newsletter form using a pre-specified
         list of individual verifiers. If one verifier fails, it automatically fails.
         """
-        return all([verify(event) for verify in self.newsletter_form_submit_verifiers])
+        return all([verify(event) for verify in self.verifiers])
+
+
+class AfroLANewsletterFormVerifier(SiteNewsletterFormVerifier):
+    """
+    Newsletter-form-submission verification logic for AfroLA.
+    """
+
+    @staticmethod
+    def has_correct_urlpath(event: pd.Series) -> bool:
+        """
+        Checks if the URL path where the form submission happens is correct.
+        """
+        return event[FieldSnowplow.PAGE_URLPATH] == "/subscribe"
+
+    @property
+    def verifiers(self) -> List[Callable[[pd.Series], bool]]:
+        return [*super().verifiers, self.has_correct_urlpath]
+
+
+# ---------- SITE CLASSES ----------
+@dataclass
+class Site(ABC):
+    """
+    Base site class.
+    """
+
+    name: SiteName
+    newsletter_form_verifier: SiteNewsletterFormVerifier
 
 
 class AfroLA(Site):
     """
-    TODO docs
+    AfroLA site class.
     """
 
     name = SiteName.AFRO_LA
-
-    @staticmethod
-    def verify_newsletter_form_correct_urlpath(event: pd.Series) -> bool:
-        return event[FieldSnowplow.PAGE_URLPATH] == "/subscribe"
-
-    @property
-    def newsletter_form_submit_verifiers(self) -> List[Callable[[pd.Series], bool]]:
-        return [*super().newsletter_form_submit_verifiers, self.verify_newsletter_form_correct_urlpath]
+    newsletter_form_verifier = AfroLANewsletterFormVerifier()
