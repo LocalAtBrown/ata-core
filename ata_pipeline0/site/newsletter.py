@@ -84,7 +84,7 @@ class SiteNewsletterSubmissionValidator(ABC):
 
     def validate(self, event: pd.Series) -> bool:
         """
-        Main verification method.
+        Main validation method.
 
         Checks if a form-submission event is of a newsletter form using a pre-specified
         list of individual validators. If one validator fails, it automatically fails.
@@ -107,3 +107,27 @@ class AfroLaNewsletterSubmissionValidator(SiteNewsletterSubmissionValidator):
     @property
     def validators(self) -> List[Callable[[pd.Series], bool]]:
         return [*super().validators, self.has_correct_urlpath]
+
+
+class DallasFreePressNewsletterSubmissionValidator(SiteNewsletterSubmissionValidator):
+    """
+    Newsletter-form-submission validation logic for DFP.
+    """
+
+    pass
+
+
+class OpenVallejoNewsletterSubmissionValidator(SiteNewsletterSubmissionValidator):
+    """
+    Newsletter-form-submission validation logic for DFP.
+    """
+
+    pass
+
+
+class The19thNewsletterSubmissionValidator(SiteNewsletterSubmissionValidator):
+    """
+    Newsletter-form-submission validation logic for DFP.
+    """
+
+    pass
