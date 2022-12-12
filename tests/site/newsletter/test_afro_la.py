@@ -60,8 +60,6 @@ def event() -> pd.Series:
         ],
     )
 
-    # TODO: Make preprocessors like these site class attributes so that we don't
-    # have to do this all the time
     preprocessor = ConvertFieldTypes(
         fields_int={FieldSnowplow.DOMAIN_SESSIONIDX},
         fields_float={
