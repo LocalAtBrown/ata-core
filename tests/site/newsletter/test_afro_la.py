@@ -1,3 +1,5 @@
+from typing import Union
+
 import pandas as pd
 import pytest
 
@@ -12,7 +14,52 @@ def nsv() -> AfroLaNewsletterSignupValidator:
 
 
 @pytest.fixture(scope="class")
-def event() -> pd.Series:
+def fields() -> Union[FieldSnowplow, FieldNew]:
+    return [
+        FieldSnowplow.PAGE_REFERRER,
+        FieldNew.SITE_NAME,
+        FieldSnowplow.DERIVED_TSTAMP,
+        FieldSnowplow.DOC_HEIGHT,
+        FieldSnowplow.DOMAIN_SESSIONIDX,
+        FieldSnowplow.DOMAIN_USERID,
+        FieldSnowplow.DVCE_SCREENHEIGHT,
+        FieldSnowplow.DVCE_SCREENWIDTH,
+        FieldSnowplow.EVENT_ID,
+        FieldSnowplow.EVENT_NAME,
+        FieldSnowplow.NETWORK_USERID,
+        FieldSnowplow.PAGE_URLPATH,
+        FieldSnowplow.PP_YOFFSET_MAX,
+        FieldSnowplow.REFR_MEDIUM,
+        FieldSnowplow.REFR_SOURCE,
+        FieldSnowplow.SEMISTRUCT_FORM_CHANGE,
+        FieldSnowplow.SEMISTRUCT_FORM_FOCUS,
+        FieldSnowplow.SEMISTRUCT_FORM_SUBMIT,
+        FieldSnowplow.USERAGENT,
+    ]
+
+
+@pytest.fixture(scope="class")
+def preprocessor_convert_field_types() -> ConvertFieldTypes:
+    return ConvertFieldTypes(
+        fields_int={FieldSnowplow.DOMAIN_SESSIONIDX},
+        fields_float={
+            FieldSnowplow.DOC_HEIGHT,
+            FieldSnowplow.DVCE_SCREENHEIGHT,
+            FieldSnowplow.DVCE_SCREENWIDTH,
+            FieldSnowplow.PP_YOFFSET_MAX,
+        },
+        fields_datetime={FieldSnowplow.DERIVED_TSTAMP},
+        fields_categorical={FieldSnowplow.EVENT_NAME, FieldSnowplow.REFR_MEDIUM, FieldSnowplow.REFR_SOURCE},
+        fields_json={
+            FieldSnowplow.SEMISTRUCT_FORM_CHANGE,
+            FieldSnowplow.SEMISTRUCT_FORM_FOCUS,
+            FieldSnowplow.SEMISTRUCT_FORM_SUBMIT,
+        },
+    )
+
+
+@pytest.fixture(scope="class")
+def event(fields, preprocessor_convert_field_types) -> pd.Series:
     df = pd.DataFrame(
         [
             [
@@ -37,56 +84,45 @@ def event() -> pd.Series:
                 "Mozilla/5.0 (X11; CrOS x86_64 14816.131.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36",
             ]
         ],
-        columns=[
-            FieldSnowplow.PAGE_REFERRER,
-            FieldNew.SITE_NAME,
-            FieldSnowplow.DERIVED_TSTAMP,
-            FieldSnowplow.DOC_HEIGHT,
-            FieldSnowplow.DOMAIN_SESSIONIDX,
-            FieldSnowplow.DOMAIN_USERID,
-            FieldSnowplow.DVCE_SCREENHEIGHT,
-            FieldSnowplow.DVCE_SCREENWIDTH,
-            FieldSnowplow.EVENT_ID,
-            FieldSnowplow.EVENT_NAME,
-            FieldSnowplow.NETWORK_USERID,
-            FieldSnowplow.PAGE_URLPATH,
-            FieldSnowplow.PP_YOFFSET_MAX,
-            FieldSnowplow.REFR_MEDIUM,
-            FieldSnowplow.REFR_SOURCE,
-            FieldSnowplow.SEMISTRUCT_FORM_CHANGE,
-            FieldSnowplow.SEMISTRUCT_FORM_FOCUS,
-            FieldSnowplow.SEMISTRUCT_FORM_SUBMIT,
-            FieldSnowplow.USERAGENT,
-        ],
+        columns=fields,
     )
 
-    preprocessor = ConvertFieldTypes(
-        fields_int={FieldSnowplow.DOMAIN_SESSIONIDX},
-        fields_float={
-            FieldSnowplow.DOC_HEIGHT,
-            FieldSnowplow.DVCE_SCREENHEIGHT,
-            FieldSnowplow.DVCE_SCREENWIDTH,
-            FieldSnowplow.PP_YOFFSET_MAX,
-        },
-        fields_datetime={FieldSnowplow.DERIVED_TSTAMP},
-        fields_categorical={FieldSnowplow.EVENT_NAME, FieldSnowplow.REFR_MEDIUM, FieldSnowplow.REFR_SOURCE},
-        fields_json={
-            FieldSnowplow.SEMISTRUCT_FORM_CHANGE,
-            FieldSnowplow.SEMISTRUCT_FORM_FOCUS,
-            FieldSnowplow.SEMISTRUCT_FORM_SUBMIT,
-        },
-    )
-
-    return preprocessor(df).iloc[0]
+    return preprocessor_convert_field_types(df).iloc[0]
 
 
 @pytest.mark.unit
 class TestAfroLaNewsletterSignupValidators:
-    def test_has_data(self, nsv, event) -> None:
+    def test_has_data_true(self, nsv, event) -> None:
         assert nsv.has_data(event)
 
-    def test_has_email_input(self, nsv, event) -> None:
+    def test_has_data_false(self, nsv, event) -> None:
+        event = event.copy()
+        event[FieldSnowplow.SEMISTRUCT_FORM_SUBMIT] = None
+        assert nsv.has_data(event) is False
+
+    def test_has_email_input_true(self, nsv, event) -> None:
         assert nsv.has_email_input(event)
 
-    def test_has_correct_urlpath(self, nsv, event) -> None:
+    def test_has_email_input_false(self, nsv, event) -> None:
+        event = event.copy()
+        event[FieldSnowplow.SEMISTRUCT_FORM_SUBMIT] = {
+            "formId": "",
+            "formClasses": [],
+            "elements": [
+                {
+                    "name": "email",
+                    "value": "dummyemail@dummydomain.com",
+                    "nodeName": "INPUT",
+                    "type": "text",  # must be "type": "email"
+                }
+            ],
+        }
+        assert nsv.has_email_input(event) is False
+
+    def test_has_correct_urlpath_true(self, nsv, event) -> None:
         assert nsv.has_correct_urlpath(event)
+
+    def test_has_correct_urlpath_false(self, nsv, event) -> None:
+        event = event.copy()
+        event[FieldSnowplow.PAGE_URLPATH] = "/"
+        assert nsv.has_correct_urlpath(event) is False
