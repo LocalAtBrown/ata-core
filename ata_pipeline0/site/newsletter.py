@@ -51,7 +51,7 @@ def parse_form_submit_dict(data: Dict) -> FormSubmitData:
     )
 
 
-# ---------- SITE NEWSLETTER-FORM-SUBMISSION validatorS ----------
+# ---------- SITE NEWSLETTER-FORM-SUBMISSION VALIDATORS ----------
 class SiteNewsletterSignupValidator(ABC):
     """
     Base class storing common newsletter-form-submission validators across all of our
