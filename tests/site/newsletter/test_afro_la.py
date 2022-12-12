@@ -83,7 +83,7 @@ def event() -> pd.Series:
 
 
 @pytest.mark.unit
-class TestAfroLa:
+class TestAfroLaNewsletterSubmissionValidators:
     def test_has_nonemtpy_data(self, nsv, event) -> None:
         assert nsv.has_nonempty_data(event)
 
