@@ -1,7 +1,6 @@
-import functools
 from abc import ABC
 from dataclasses import dataclass
-from typing import Callable, List, Optional, cast
+from typing import Callable, Dict, List, Optional
 
 import pandas as pd
 
@@ -38,13 +37,17 @@ class FormSubmitData:
     elements: List[FormElement]
 
 
-@functools.cache
-def parse_form_submit_dict(data: dict) -> FormSubmitData:
+def parse_form_submit_dict(data: Dict) -> FormSubmitData:
     """
     Creates a dataclass from a corresponding `dict` of form-submission data.
     """
     return FormSubmitData(
-        form_id=data["formId"], form_classes=data["formClasses"], elements=[FormElement(*e) for e in data["elements"]]
+        form_id=data["formId"],
+        form_classes=data["formClasses"],
+        elements=[
+            FormElement(name=e["name"], node_name=e["nodeName"], value=e.get("value"), type=e.get("type"))
+            for e in data["elements"]
+        ],
     )
 
 
@@ -62,8 +65,7 @@ class SiteNewsletterSubmissionValidator(ABC):
         """
         # Should only be either dict or None because we'll perform this check
         # after the ConvertFieldTypes and ReplaceNaNs preprocessors
-        form_data_raw = cast(Optional[dict], event[FieldSnowplow.SEMISTRUCT_FORM_SUBMIT])
-        return form_data_raw is not None
+        return event[FieldSnowplow.SEMISTRUCT_FORM_SUBMIT] is not None
 
     @staticmethod
     def has_email_input(event: pd.Series) -> bool:
