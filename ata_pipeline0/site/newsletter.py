@@ -1,24 +1,11 @@
 import functools
 from abc import ABC
 from dataclasses import dataclass
-from enum import Enum
 from typing import Callable, List, Optional, cast
 
 import pandas as pd
 
 from ata_pipeline0.helpers.fields import FieldSnowplow
-
-
-# ---------- SITE NAMES ----------
-class SiteName(str, Enum):
-    """
-    Enum of partner slugs corresponding to the S3 buckets
-    """
-
-    AFRO_LA = "afro-la"
-    DALLAS_FREE_PRESS = "dallas-free-press"
-    OPEN_VALLEJO = "open-vallejo"
-    THE_19TH = "the-19th"
 
 
 # ---------- SITE FORM-SUBMISSION EVENT UTILITIES ----------
@@ -61,10 +48,10 @@ def parse_form_submit_dict(data: dict) -> FormSubmitData:
     )
 
 
-# ---------- SITE NEWSLETTER-FORM-SUBMISSION VERIFIERS ----------
-class SiteNewsletterFormVerifier(ABC):
+# ---------- SITE NEWSLETTER-FORM-SUBMISSION validatorS ----------
+class SiteNewsletterSubmissionValidator(ABC):
     """
-    Base class storing common newsletter-form-submission verifiers across all of our
+    Base class storing common newsletter-form-submission validators across all of our
     partners.
     """
 
@@ -88,26 +75,26 @@ class SiteNewsletterFormVerifier(ABC):
         return any([e.node_name == "INPUT" and e.type == "email" for e in form_data.elements])
 
     @property
-    def verifiers(self) -> List[Callable[[pd.Series], bool]]:
+    def validators(self) -> List[Callable[[pd.Series], bool]]:
         """
-        List of individual verifiers used to check if a form-submission event is of a newsletter form.
-        It's supposed (but not required) to be extended (or superseded) by child classes of `SiteNewsletterFormVerifier`.
+        List of individual validators used to check if a form-submission event is of a newsletter form.
+        It's supposed (but not required) to be extended (or superseded) by child classes of `SiteNewsletterFormValidator`.
         """
         return [self.has_nonempty_data, self.has_email_input]
 
-    def verify(self, event: pd.Series) -> bool:
+    def validate(self, event: pd.Series) -> bool:
         """
         Main verification method.
 
         Checks if a form-submission event is of a newsletter form using a pre-specified
-        list of individual verifiers. If one verifier fails, it automatically fails.
+        list of individual validators. If one validator fails, it automatically fails.
         """
-        return all([verify(event) for verify in self.verifiers])
+        return all([validate(event) for validate in self.validators])
 
 
-class AfroLANewsletterFormVerifier(SiteNewsletterFormVerifier):
+class AfroLaNewsletterSubmissionValidator(SiteNewsletterSubmissionValidator):
     """
-    Newsletter-form-submission verification logic for AfroLA.
+    Newsletter-form-submission validation logic for AfroLA.
     """
 
     @staticmethod
@@ -118,25 +105,5 @@ class AfroLANewsletterFormVerifier(SiteNewsletterFormVerifier):
         return event[FieldSnowplow.PAGE_URLPATH] == "/subscribe"
 
     @property
-    def verifiers(self) -> List[Callable[[pd.Series], bool]]:
-        return [*super().verifiers, self.has_correct_urlpath]
-
-
-# ---------- SITE CLASSES ----------
-@dataclass
-class Site(ABC):
-    """
-    Base site class.
-    """
-
-    name: SiteName
-    newsletter_form_verifier: SiteNewsletterFormVerifier
-
-
-class AfroLA(Site):
-    """
-    AfroLA site class.
-    """
-
-    name = SiteName.AFRO_LA
-    newsletter_form_verifier = AfroLANewsletterFormVerifier()
+    def validators(self) -> List[Callable[[pd.Series], bool]]:
+        return [*super().validators, self.has_correct_urlpath]
