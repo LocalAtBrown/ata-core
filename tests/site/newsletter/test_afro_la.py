@@ -1,4 +1,4 @@
-from typing import Union
+from typing import List, Union
 
 import pandas as pd
 import pytest
@@ -14,7 +14,7 @@ def nsv() -> AfroLaNewsletterSignupValidator:
 
 
 @pytest.fixture(scope="class")
-def fields() -> Union[FieldSnowplow, FieldNew]:
+def fields() -> List[Union[FieldSnowplow, FieldNew]]:
     return [
         FieldSnowplow.PAGE_REFERRER,
         FieldNew.SITE_NAME,
