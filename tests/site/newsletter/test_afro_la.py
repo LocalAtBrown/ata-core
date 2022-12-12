@@ -82,8 +82,8 @@ def event() -> pd.Series:
 
 @pytest.mark.unit
 class TestAfroLaNewsletterSignupValidators:
-    def test_has_nonemtpy_data(self, nsv, event) -> None:
-        assert nsv.has_nonempty_data(event)
+    def test_has_data(self, nsv, event) -> None:
+        assert nsv.has_data(event)
 
     def test_has_email_input(self, nsv, event) -> None:
         assert nsv.has_email_input(event)

@@ -59,7 +59,7 @@ class SiteNewsletterSignupValidator(ABC):
     """
 
     @staticmethod
-    def has_nonempty_data(event: pd.Series) -> bool:
+    def has_data(event: pd.Series) -> bool:
         """
         Checks if a form-submission event actually has form HTML data.
         """
@@ -82,7 +82,7 @@ class SiteNewsletterSignupValidator(ABC):
         List of individual validators used to check if a form-submission event is of a newsletter form.
         It's supposed (but not required) to be extended (or superseded) by child classes of `SiteNewsletterFormValidator`.
         """
-        return [self.has_nonempty_data, self.has_email_input]
+        return [self.has_data, self.has_email_input]
 
     def validate(self, event: pd.Series) -> bool:
         """
