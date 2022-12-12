@@ -3,12 +3,12 @@ import pytest
 
 from ata_pipeline0.helpers.fields import FieldNew, FieldSnowplow
 from ata_pipeline0.helpers.preprocessors import ConvertFieldTypes
-from ata_pipeline0.site.newsletter import AfroLaNewsletterSubmissionValidator
+from ata_pipeline0.site.newsletter import AfroLaNewsletterSignupValidator
 
 
 @pytest.fixture(scope="class")
-def nsv() -> AfroLaNewsletterSubmissionValidator:
-    return AfroLaNewsletterSubmissionValidator()
+def nsv() -> AfroLaNewsletterSignupValidator:
+    return AfroLaNewsletterSignupValidator()
 
 
 @pytest.fixture(scope="class")
@@ -81,7 +81,7 @@ def event() -> pd.Series:
 
 
 @pytest.mark.unit
-class TestAfroLaNewsletterSubmissionValidators:
+class TestAfroLaNewsletterSignupValidators:
     def test_has_nonemtpy_data(self, nsv, event) -> None:
         assert nsv.has_nonempty_data(event)
 

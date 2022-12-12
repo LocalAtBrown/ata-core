@@ -3,11 +3,11 @@ from dataclasses import dataclass
 
 from ata_pipeline0.site.names import SiteName
 from ata_pipeline0.site.newsletter import (
-    AfroLaNewsletterSubmissionValidator,
-    DallasFreePressNewsletterSubmissionValidator,
-    OpenVallejoNewsletterSubmissionValidator,
-    SiteNewsletterSubmissionValidator,
-    The19thNewsletterSubmissionValidator,
+    AfroLaNewsletterSignupValidator,
+    DallasFreePressNewsletterSignupValidator,
+    OpenVallejoNewsletterSignupValidator,
+    SiteNewsletterSignupValidator,
+    The19thNewsletterSignupValidator,
 )
 
 
@@ -19,7 +19,7 @@ class Site(ABC):
     """
 
     name: SiteName
-    newsletter_submission_validator: SiteNewsletterSubmissionValidator
+    newsletter_signup_validator: SiteNewsletterSignupValidator
 
 
 class AfroLA(Site):
@@ -28,7 +28,7 @@ class AfroLA(Site):
     """
 
     name = SiteName.AFRO_LA
-    newsletter_submission_validator = AfroLaNewsletterSubmissionValidator()
+    newsletter_signup_validator = AfroLaNewsletterSignupValidator()
 
 
 class DallasFreePress(Site):
@@ -37,7 +37,7 @@ class DallasFreePress(Site):
     """
 
     name = SiteName.DALLAS_FREE_PRESS
-    newsletter_submission_validator = DallasFreePressNewsletterSubmissionValidator()
+    newsletter_signup_validator = DallasFreePressNewsletterSignupValidator()
 
 
 class OpenVallejo(Site):
@@ -46,7 +46,7 @@ class OpenVallejo(Site):
     """
 
     name = SiteName.OPEN_VALLEJO
-    newsletter_submission_validator = OpenVallejoNewsletterSubmissionValidator()
+    newsletter_signup_validator = OpenVallejoNewsletterSignupValidator()
 
 
 class The19th(Site):
@@ -55,4 +55,4 @@ class The19th(Site):
     """
 
     name = SiteName.THE_19TH
-    newsletter_submission_validator = The19thNewsletterSubmissionValidator()
+    newsletter_signup_validator = The19thNewsletterSignupValidator()

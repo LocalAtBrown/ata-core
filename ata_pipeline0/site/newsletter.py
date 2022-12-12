@@ -52,7 +52,7 @@ def parse_form_submit_dict(data: Dict) -> FormSubmitData:
 
 
 # ---------- SITE NEWSLETTER-FORM-SUBMISSION validatorS ----------
-class SiteNewsletterSubmissionValidator(ABC):
+class SiteNewsletterSignupValidator(ABC):
     """
     Base class storing common newsletter-form-submission validators across all of our
     partners.
@@ -94,7 +94,7 @@ class SiteNewsletterSubmissionValidator(ABC):
         return all([validate(event) for validate in self.validators])
 
 
-class AfroLaNewsletterSubmissionValidator(SiteNewsletterSubmissionValidator):
+class AfroLaNewsletterSignupValidator(SiteNewsletterSignupValidator):
     """
     Newsletter-form-submission validation logic for AfroLA.
     """
@@ -111,7 +111,7 @@ class AfroLaNewsletterSubmissionValidator(SiteNewsletterSubmissionValidator):
         return [*super().validators, self.has_correct_urlpath]
 
 
-class DallasFreePressNewsletterSubmissionValidator(SiteNewsletterSubmissionValidator):
+class DallasFreePressNewsletterSignupValidator(SiteNewsletterSignupValidator):
     """
     Newsletter-form-submission validation logic for DFP.
     """
@@ -120,7 +120,7 @@ class DallasFreePressNewsletterSubmissionValidator(SiteNewsletterSubmissionValid
     pass
 
 
-class OpenVallejoNewsletterSubmissionValidator(SiteNewsletterSubmissionValidator):
+class OpenVallejoNewsletterSignupValidator(SiteNewsletterSignupValidator):
     """
     Newsletter-form-submission validation logic for OpenVallejo.
     """
@@ -129,7 +129,7 @@ class OpenVallejoNewsletterSubmissionValidator(SiteNewsletterSubmissionValidator
     pass
 
 
-class The19thNewsletterSubmissionValidator(SiteNewsletterSubmissionValidator):
+class The19thNewsletterSignupValidator(SiteNewsletterSignupValidator):
     """
     Newsletter-form-submission validation logic for The 19th.
     """
