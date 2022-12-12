@@ -9,7 +9,7 @@ import user_agents as ua
 
 from ata_pipeline0.helpers.fields import FieldNew, FieldSnowplow
 from ata_pipeline0.helpers.logging import logging
-from ata_pipeline0.helpers.site import SiteName
+from ata_pipeline0.site.names import SiteName
 
 logger = logging.getLogger(__name__)
 

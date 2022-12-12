@@ -20,7 +20,7 @@ from ata_pipeline0.helpers.preprocessors import (
     ReplaceNaNs,
     SelectFieldsRelevant,
 )
-from ata_pipeline0.helpers.site import SiteName
+from ata_pipeline0.site.names import SiteName
 
 
 # ---------- FIXTURES ----------

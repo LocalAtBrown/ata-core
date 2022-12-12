@@ -11,7 +11,7 @@ from sqlalchemy.orm import sessionmaker
 
 from ata_pipeline0.helpers.fields import FieldNew, FieldSnowplow
 from ata_pipeline0.helpers.preprocessors import ConvertFieldTypes
-from ata_pipeline0.helpers.site import SiteName
+from ata_pipeline0.site.names import SiteName
 from ata_pipeline0.write_events import write_events
 
 
