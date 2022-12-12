@@ -116,6 +116,7 @@ class DallasFreePressNewsletterSubmissionValidator(SiteNewsletterSubmissionValid
     Newsletter-form-submission validation logic for DFP.
     """
 
+    # TODO
     pass
 
 
@@ -124,6 +125,7 @@ class OpenVallejoNewsletterSubmissionValidator(SiteNewsletterSubmissionValidator
     Newsletter-form-submission validation logic for OpenVallejo.
     """
 
+    # TODO
     pass
 
 
@@ -132,4 +134,5 @@ class The19thNewsletterSubmissionValidator(SiteNewsletterSubmissionValidator):
     Newsletter-form-submission validation logic for The 19th.
     """
 
+    # TODO
     pass
