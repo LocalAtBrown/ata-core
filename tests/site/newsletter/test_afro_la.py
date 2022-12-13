@@ -119,10 +119,10 @@ class TestAfroLaNewsletterSignupValidators:
         }
         assert nsv.has_email_input(event) is False
 
-    def test_has_correct_urlpath_true(self, nsv, event) -> None:
-        assert nsv.has_correct_urlpath(event)
+    def test_is_in_newsletter_page_true(self, nsv, event) -> None:
+        assert nsv.is_in_newsletter_page(event)
 
-    def test_has_correct_urlpath_false(self, nsv, event) -> None:
+    def test_is_in_newsletter_page_false(self, nsv, event) -> None:
         event = event.copy()
         event[FieldSnowplow.PAGE_URLPATH] = "/"
-        assert nsv.has_correct_urlpath(event) is False
+        assert nsv.is_in_newsletter_page(event) is False
