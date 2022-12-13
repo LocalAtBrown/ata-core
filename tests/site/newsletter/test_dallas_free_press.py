@@ -12,7 +12,7 @@ def nsv() -> DallasFreePressNewsletterSignupValidator:
 
 
 @pytest.fixture(scope="class")
-def event(all_fields, preprocessor_convert_all_field_types) -> pd.Series:
+def event(all_fields, preprocessor_convert_all_field_types, dummy_email) -> pd.Series:
     df = pd.DataFrame(
         [
             [
@@ -33,7 +33,8 @@ def event(all_fields, preprocessor_convert_all_field_types) -> pd.Series:
                 SiteName.DALLAS_FREE_PRESS,
                 None,
                 None,
-                "{'formId': 'mc-embedded-subscribe-form', 'formClasses': ['validate'], 'elements': [{'name': 'EMAIL', 'value': 'dummyemail@dummydomain.com', 'nodeName': 'INPUT', 'type': 'email'}, {'name': 'FNAME', 'value': 'Libby', 'nodeName': 'INPUT', 'type': 'text'}, {'name': 'LNAME', 'value': 'Daniels', 'nodeName': 'INPUT', 'type': 'text'}, {'name': 'MMERGE3', 'value': '75231', 'nodeName': 'INPUT', 'type': 'text'}, {'name': 'MMERGE4', 'value': '9729253923', 'nodeName': 'INPUT', 'type': 'text'}, {'name': 'group[8368][1]', 'value': '1', 'nodeName': 'INPUT', 'type': 'checkbox'}, {'name': 'group[8368][2]', 'value': '2', 'nodeName': 'INPUT', 'type': 'checkbox'}, {'name': 'group[8368][4]', 'value': None, 'nodeName': 'INPUT', 'type': 'checkbox'}, {'name': 'b_6cbf3c038f5cc4d279f4da4ed_37f4ad3cfe', 'value': '', 'nodeName': 'INPUT', 'type': 'text'}]}",
+                "{'formId': 'mc-embedded-subscribe-form', 'formClasses': ['validate'], 'elements': [{'name': 'EMAIL', 'value': '%s', 'nodeName': 'INPUT', 'type': 'email'}, {'name': 'FNAME', 'value': 'Libby', 'nodeName': 'INPUT', 'type': 'text'}, {'name': 'LNAME', 'value': 'Daniels', 'nodeName': 'INPUT', 'type': 'text'}, {'name': 'MMERGE3', 'value': '75231', 'nodeName': 'INPUT', 'type': 'text'}, {'name': 'MMERGE4', 'value': '9729253923', 'nodeName': 'INPUT', 'type': 'text'}, {'name': 'group[8368][1]', 'value': '1', 'nodeName': 'INPUT', 'type': 'checkbox'}, {'name': 'group[8368][2]', 'value': '2', 'nodeName': 'INPUT', 'type': 'checkbox'}, {'name': 'group[8368][4]', 'value': None, 'nodeName': 'INPUT', 'type': 'checkbox'}, {'name': 'b_6cbf3c038f5cc4d279f4da4ed_37f4ad3cfe', 'value': '', 'nodeName': 'INPUT', 'type': 'text'}]}"
+                % dummy_email,
                 "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36",
             ]
         ],
@@ -48,7 +49,7 @@ class TestDallasFreePressNewsletterSignupValidators:
     def test_is_newsletter_inline_form_true(self, nsv, event) -> None:
         assert nsv.is_newsletter_inline_form(event)
 
-    def test_is_newsletter_inline_form_false(self, nsv, event) -> None:
+    def test_is_newsletter_inline_form_false(self, nsv, event, dummy_email) -> None:
         event = event.copy()
         event[FieldSnowplow.SEMISTRUCT_FORM_SUBMIT] = {
             "formId": "dummy-id",  # must be "mc-embedded-subscribe-form"
@@ -56,7 +57,7 @@ class TestDallasFreePressNewsletterSignupValidators:
             "elements": [
                 {
                     "name": "email",
-                    "value": "dummyemail@dummydomain.com",
+                    "value": dummy_email,
                     "nodeName": "INPUT",
                     "type": "email",
                 }
