@@ -2,6 +2,7 @@ import pandas as pd
 import pytest
 
 from ata_pipeline0.helpers.fields import FieldSnowplow
+from ata_pipeline0.site.names import SiteName
 from ata_pipeline0.site.newsletter import AfroLaNewsletterSignupValidator
 
 
@@ -29,7 +30,7 @@ def event(all_fields, preprocessor_convert_all_field_types) -> pd.Series:
                 None,
                 "unknown",
                 None,
-                "afro-la",
+                SiteName.AFRO_LA,
                 None,
                 None,
                 "{'formId': 'FORM', 'formClasses': ['group', 'w-full', 'rounded-wt', 'bg-transparent', 'shadow-none', 'sm:shadow-md'], 'elements': [{'name': 'ref', 'value': '', 'nodeName': 'INPUT', 'type': 'text'}, {'name': 'redirect_path', 'value': '/', 'nodeName': 'INPUT', 'type': 'hidden'}, {'name': 'double_opt', 'value': 'true', 'nodeName': 'INPUT', 'type': 'hidden'}, {'name': 'origin', 'value': '/subscribe', 'nodeName': 'INPUT', 'type': 'hidden'}, {'name': 'visit_token', 'value': '004abfd4-ea3e-4246-87a4-83d0e153d383', 'nodeName': 'INPUT', 'type': 'text'}, {'name': 'email', 'value': 'dummyemail@dummydomain.com', 'nodeName': 'INPUT', 'type': 'email'}]}",
