@@ -108,8 +108,16 @@ class DallasFreePressNewsletterSignupValidator(SiteNewsletterSignupValidator):
     Newsletter-form-submission validation logic for DFP.
     """
 
-    # TODO
-    pass
+    @staticmethod
+    def is_newsletter_inline_form(event: pd.Series) -> bool:
+        """
+        Checks if the HTML form is an inline Mailchimp newsletter form.
+        """
+        form_data = parse_form_submit_dict(event[FieldSnowplow.SEMISTRUCT_FORM_SUBMIT])
+        return form_data.form_id == "mc-embedded-subscribe-form"
+
+    def validate(self, event: pd.Series) -> bool:
+        return super().validate(event) and self.is_newsletter_inline_form(event)
 
 
 class OpenVallejoNewsletterSignupValidator(SiteNewsletterSignupValidator):
