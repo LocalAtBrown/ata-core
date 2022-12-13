@@ -3,12 +3,7 @@ import pytest
 
 from ata_pipeline0.helpers.fields import FieldSnowplow
 from ata_pipeline0.site.names import SiteName
-from ata_pipeline0.site.newsletter import AfroLaNewsletterSignupValidator
-
-
-@pytest.fixture(scope="class")
-def nsv() -> AfroLaNewsletterSignupValidator:
-    return AfroLaNewsletterSignupValidator()
+from ata_pipeline0.site.newsletter import SiteNewsletterSignupValidator
 
 
 @pytest.fixture(scope="class")
@@ -44,11 +39,30 @@ def event(all_fields, preprocessor_convert_all_field_types) -> pd.Series:
 
 
 @pytest.mark.unit
-class TestAfroLaNewsletterSignupValidators:
-    def test_is_in_newsletter_page_true(self, nsv, event) -> None:
-        assert nsv.is_in_newsletter_page(event)
+class TestSiteNewsletterSignupValidators:
+    def test_has_data_true(self, event) -> None:
+        assert SiteNewsletterSignupValidator.has_data(event)
 
-    def test_is_in_newsletter_page_false(self, nsv, event) -> None:
+    def test_has_data_false(self, event) -> None:
         event = event.copy()
-        event[FieldSnowplow.PAGE_URLPATH] = "/"
-        assert nsv.is_in_newsletter_page(event) is False
+        event[FieldSnowplow.SEMISTRUCT_FORM_SUBMIT] = None
+        assert SiteNewsletterSignupValidator.has_data(event) is False
+
+    def test_has_email_input_true(self, event) -> None:
+        assert SiteNewsletterSignupValidator.has_email_input(event)
+
+    def test_has_email_input_false(self, event) -> None:
+        event = event.copy()
+        event[FieldSnowplow.SEMISTRUCT_FORM_SUBMIT] = {
+            "formId": "",
+            "formClasses": [],
+            "elements": [
+                {
+                    "name": "email",
+                    "value": "dummyemail@dummydomain.com",
+                    "nodeName": "INPUT",
+                    "type": "text",  # must be "type": "email"
+                }
+            ],
+        }
+        assert SiteNewsletterSignupValidator.has_email_input(event) is False
