@@ -125,8 +125,25 @@ class OpenVallejoNewsletterSignupValidator(SiteNewsletterSignupValidator):
     Newsletter-form-submission validation logic for OpenVallejo.
     """
 
-    # TODO
-    pass
+    @staticmethod
+    def is_newsletter_inline_form(event: pd.Series) -> bool:
+        """
+        Checks if the HTML form is an inline Mailchimp newsletter form.
+        """
+        form_data = parse_form_submit_dict(event[FieldSnowplow.SEMISTRUCT_FORM_SUBMIT])
+        return form_data.form_id == "mc-embedded-subscribe-form"
+
+    @staticmethod
+    def is_newsletter_popup_form(event: pd.Series) -> bool:
+        """
+        Checks if the HTML form is a pop-up Mailchimp newsletter form.
+        """
+
+        # TODO once we have data for this kind of form in S3
+        pass
+
+    def validate(self, event: pd.Series) -> bool:
+        return super().validate(event) and (self.is_newsletter_inline_form(event) or self.is_newsletter_popup_form(event))
 
 
 class The19thNewsletterSignupValidator(SiteNewsletterSignupValidator):
