@@ -1,4 +1,6 @@
+from abc import ABC
 from dataclasses import dataclass
+from typing import Dict
 
 from ata_pipeline0.site.names import SiteName
 from ata_pipeline0.site.newsletter import (
@@ -12,7 +14,17 @@ from ata_pipeline0.site.newsletter import (
 
 # ---------- SITE CLASSES ----------
 @dataclass
-class AfroLa:
+class Site(ABC):
+    """
+    Base site class.
+    """
+
+    name: SiteName
+    newsletter_signup_validator: SiteNewsletterSignupValidator
+
+
+@dataclass
+class AfroLa(Site):
     """
     AfroLA site class.
     """
@@ -22,7 +34,7 @@ class AfroLa:
 
 
 @dataclass
-class DallasFreePress:
+class DallasFreePress(Site):
     """
     Dallas Free Press site class.
     """
@@ -32,7 +44,7 @@ class DallasFreePress:
 
 
 @dataclass
-class OpenVallejo:
+class OpenVallejo(Site):
     """
     OpenVallejo site class.
     """
@@ -42,7 +54,7 @@ class OpenVallejo:
 
 
 @dataclass
-class The19th:
+class The19th(Site):
     """
     The 19th site class.
     """
@@ -51,7 +63,7 @@ class The19th:
     newsletter_signup_validator: SiteNewsletterSignupValidator = The19thNewsletterSignupValidator()
 
 
-SITES = {
+SITES: Dict[SiteName, Site] = {
     SiteName.AFRO_LA: AfroLa(),
     SiteName.DALLAS_FREE_PRESS: DallasFreePress(),
     SiteName.OPEN_VALLEJO: OpenVallejo(),
