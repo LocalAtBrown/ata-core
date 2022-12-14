@@ -1,15 +1,17 @@
 import ast
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Dict, Set
+from typing import Any, Dict, Set, Union
 
 import numpy as np
 import pandas as pd
 import user_agents as ua
 
+from ata_pipeline0.helpers.events import Event
 from ata_pipeline0.helpers.fields import FieldNew, FieldSnowplow
 from ata_pipeline0.helpers.logging import logging
 from ata_pipeline0.site.names import SiteName
+from ata_pipeline0.site.newsletter import SiteNewsletterSignupValidator
 
 logger = logging.getLogger(__name__)
 
@@ -195,6 +197,40 @@ class AddFieldSiteName(Preprocessor):
 
     def log_result(self, df_in=None, df_out=None) -> None:
         logger.info(f"Added site name {self.site_name} as a new field")
+
+
+@dataclass
+class AddFieldFormSubmitIsNewsletter(Preprocessor):
+    """
+    Adds a field indicating whether a form-submission event is of a newsletter-signup form.
+    """
+
+    site_newsletter_signup_validator: SiteNewsletterSignupValidator
+    field_event_name: FieldSnowplow
+    field_form_submit_is_newsletter: FieldNew
+
+    def transform(self, df: pd.DataFrame) -> pd.DataFrame:
+        # Make a copy of the original so that it's not affected, but can remove
+        # this if memory is an issue
+        df = df.copy()
+
+        df[self.field_form_submit_is_newsletter] = df.apply(self._is_newsletter_signup, axis=1)
+
+        return df
+
+    def log_result(self, df_in=None, df_out=None) -> None:
+        logger.info(
+            f"Added a new field {self.field_form_submit_is_newsletter} to check if form-submission event is a newsletter signup"
+        )
+
+    def _is_newsletter_signup(self, event: pd.Series) -> Union[float, bool]:
+        # Return np.nan if event is not a form-submission event
+        # (can't return None because it'll throw off mypy, but np.nan will be
+        # converted into None by the ReplaceNaNs preprocessor)
+        if event[self.field_event_name] != Event.SUBMIT_FORM:
+            return np.nan
+
+        return self.site_newsletter_signup_validator.validate(event)
 
 
 @dataclass
