@@ -19,6 +19,11 @@ def dummy_email() -> str:
 
 @pytest.mark.unit
 class TestSite:
+    """
+    Unit tests for base site validators.
+    """
+
+    # ---------- FIXTURES ----------
     @pytest.fixture(scope="class")
     def event(site, all_fields, preprocessor_convert_all_field_types, dummy_email) -> pd.Series:
         df = pd.DataFrame(
@@ -51,6 +56,7 @@ class TestSite:
 
         return preprocessor_convert_all_field_types(df).iloc[0]
 
+    # ---------- TESTS ----------
     def test_has_data_true(self, event) -> None:
         assert SiteNewsletterSignupValidator.has_data(event)
 
@@ -81,6 +87,11 @@ class TestSite:
 
 @pytest.mark.unit
 class TestAfroLa:
+    """
+    Unit tests for AfroLA validators.
+    """
+
+    # ---------- FIXTURES ----------
     @pytest.fixture(scope="class")
     def nsv(self) -> AfroLaNewsletterSignupValidator:
         return AfroLaNewsletterSignupValidator()
@@ -117,6 +128,7 @@ class TestAfroLa:
 
         return preprocessor_convert_all_field_types(df).iloc[0]
 
+    # ---------- TESTS ----------
     def test_is_in_newsletter_page_true(self, nsv, event) -> None:
         assert nsv.is_in_newsletter_page(event)
 
@@ -128,6 +140,11 @@ class TestAfroLa:
 
 @pytest.mark.unit
 class TestDallasFreePress:
+    """
+    Unit tests for DFP validators.
+    """
+
+    # ---------- FIXTURES ----------
     @pytest.fixture(scope="class")
     def nsv(self) -> DallasFreePressNewsletterSignupValidator:
         return DallasFreePressNewsletterSignupValidator()
@@ -164,6 +181,7 @@ class TestDallasFreePress:
 
         return preprocessor_convert_all_field_types(df).iloc[0]
 
+    # ---------- TESTS ----------
     def test_is_newsletter_inline_form_true(self, nsv, event) -> None:
         assert nsv.is_newsletter_inline_form(event)
 
@@ -186,6 +204,11 @@ class TestDallasFreePress:
 
 @pytest.mark.unit
 class TestOpenVallejoNewsletterSignupValidators:
+    """
+    Unit tests for OpenVallejo validators.
+    """
+
+    # ---------- FIXTURES ----------
     @pytest.fixture(scope="class")
     def nsv(self) -> OpenVallejoNewsletterSignupValidator:
         return OpenVallejoNewsletterSignupValidator()
@@ -227,6 +250,7 @@ class TestOpenVallejoNewsletterSignupValidators:
         # TODO once we have data for this kind of form in S3
         pass
 
+    # ---------- TESTS ----------
     def test_is_newsletter_inline_form_true(self, nsv, event_inline) -> None:
         assert nsv.is_newsletter_inline_form(event_inline)
 
@@ -257,6 +281,11 @@ class TestOpenVallejoNewsletterSignupValidators:
 
 @pytest.mark.unit
 class TestThe19thNewsletterSignupValidators:
+    """
+    Unit tests for The 19th validators.
+    """
+
+    # ---------- FIXTURES ----------
     @pytest.fixture(scope="class")
     def nsv(self) -> The19thNewsletterSignupValidator:
         return The19thNewsletterSignupValidator()
@@ -293,6 +322,7 @@ class TestThe19thNewsletterSignupValidators:
 
         return preprocessor_convert_all_field_types(df).iloc[0]
 
+    # ---------- TESTS ----------
     def test_is_newsletter_form_true(self, nsv, event) -> None:
         assert nsv.is_newsletter_form(event)
 

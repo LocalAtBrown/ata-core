@@ -30,6 +30,7 @@ class TestAddFieldSiteName:
     Unit tests for the `AddFieldSiteName` preprocessor.
     """
 
+    # ---------- FIXTURES ----------
     @pytest.fixture(scope="class")
     def df(self) -> pd.DataFrame:
         return pd.DataFrame()
@@ -42,6 +43,7 @@ class TestAddFieldSiteName:
     def field_site_name(self) -> FieldNew:
         return FieldNew.SITE_NAME
 
+    # ---------- TESTS ----------
     def test(self, df, site_name, field_site_name) -> None:
         df = AddFieldSiteName(site_name, field_site_name)(df)
         # pd.Series.all returns True if all of its boolean values are True
@@ -54,6 +56,7 @@ class TestConvertFieldTypes:
     Unit tests for the `ConvertFieldTypes` preprocessor.
     """
 
+    # ---------- FIXTURES ----------
     @pytest.fixture(scope="class")
     def df(self) -> pd.DataFrame:
         return pd.DataFrame(
@@ -121,6 +124,7 @@ class TestConvertFieldTypes:
     def fields_json(self) -> Set[FieldSnowplow]:
         return {FieldSnowplow.SEMISTRUCT_FORM_FOCUS}
 
+    # ---------- TESTS ----------
     def test(self, df, fields_int, fields_float, fields_datetime, fields_categorical, fields_json) -> None:
         df = ConvertFieldTypes(fields_int, fields_float, fields_datetime, fields_categorical, fields_json)(df)
 
@@ -146,6 +150,7 @@ class TestDeleteRowsBot:
     Unit tests for the `DeleteRowsBot` preprocessor.
     """
 
+    # ---------- FIXTURES ----------
     @pytest.fixture(scope="class")
     def df(self) -> pd.DataFrame:
         return pd.DataFrame(
@@ -172,6 +177,7 @@ class TestDeleteRowsBot:
     def field_useragent(self) -> FieldSnowplow:
         return FieldSnowplow.USERAGENT
 
+    # ---------- TESTS ----------
     def test(self, df, field_useragent) -> None:
         df = DeleteRowsBot(field_useragent)(df)
         # Only first row should be removed
@@ -186,6 +192,7 @@ class TestDeleteRowsDuplicateKey:
     Unit tests for the `DeleteRowsDuplicateKey` preprocessor.
     """
 
+    # ---------- FIXTURES ----------
     @pytest.fixture(scope="class")
     def key_duplicate(self) -> str:
         return "A0"
@@ -217,6 +224,7 @@ class TestDeleteRowsDuplicateKey:
             fields_json=set(),
         )(df)
 
+    # ---------- TESTS ----------
     def test(self, df, field_primary_key, field_timestamp, key_duplicate) -> None:
         duplicate_timestamp_min = df[df[field_primary_key] == key_duplicate][field_timestamp].min()
 
@@ -241,6 +249,7 @@ class TestDeleteRowsEmpty:
     Unit tests for the `DeleteRowsEmpty` preprocessor.
     """
 
+    # ---------- FIXTURES ----------
     @pytest.fixture(scope="class")
     def df(self) -> pd.DataFrame:
         return pd.DataFrame(
@@ -287,6 +296,7 @@ class TestDeleteRowsEmpty:
     def fields_required(self) -> Set[FieldSnowplow]:
         return {FieldSnowplow.DOC_HEIGHT, FieldSnowplow.DERIVED_TSTAMP, FieldSnowplow.EVENT_NAME}
 
+    # ---------- TESTS ----------
     def test(self, df, fields_required) -> None:
         df = DeleteRowsEmpty(fields_required)(df)
         # pp_yoffset_max is not required, so the first row is off the hook
@@ -302,6 +312,7 @@ class TestReplaceNaNs:
     Unit tests for the `TestReplaceNaNs` preprocessor.
     """
 
+    # ---------- FIXTURES ----------
     @pytest.fixture(scope="class")
     def df(self) -> pd.DataFrame:
         return pd.DataFrame(
@@ -312,6 +323,7 @@ class TestReplaceNaNs:
     def replace_with(self) -> str:
         return "woo"
 
+    # ---------- TESTS ----------
     def test(self, df, replace_with) -> None:
         df = ReplaceNaNs(replace_with)(df)
         df_check = df.dropna()
@@ -324,6 +336,7 @@ class TestSelectFieldsRelevant:
     Unit tests for the `SelectFieldsRelevant` preprocessor.
     """
 
+    # ---------- FIXTURES ----------
     @pytest.fixture(scope="class")
     def df(self) -> pd.DataFrame:
         return pd.DataFrame(
@@ -341,6 +354,7 @@ class TestSelectFieldsRelevant:
     def fields_relevant(self) -> Set[FieldSnowplow]:
         return {FieldSnowplow.DERIVED_TSTAMP, FieldSnowplow.EVENT_NAME}
 
+    # ---------- TESTS ----------
     def test(self, df, fields_relevant) -> None:
         df = SelectFieldsRelevant(fields_relevant)(df)
         assert set(df.columns) == fields_relevant
