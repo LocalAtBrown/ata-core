@@ -1,7 +1,6 @@
-import functools
-from abc import ABC
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Callable, List, Optional, cast
+from typing import Dict, List, Optional
 
 import pandas as pd
 
@@ -38,32 +37,35 @@ class FormSubmitData:
     elements: List[FormElement]
 
 
-@functools.cache
-def parse_form_submit_dict(data: dict) -> FormSubmitData:
+def parse_form_submit_dict(data: Dict) -> FormSubmitData:
     """
     Creates a dataclass from a corresponding `dict` of form-submission data.
     """
     return FormSubmitData(
-        form_id=data["formId"], form_classes=data["formClasses"], elements=[FormElement(*e) for e in data["elements"]]
+        form_id=data["formId"],
+        form_classes=data["formClasses"],
+        elements=[
+            FormElement(name=e["name"], node_name=e["nodeName"], value=e.get("value"), type=e.get("type"))
+            for e in data["elements"]
+        ],
     )
 
 
-# ---------- SITE NEWSLETTER-FORM-SUBMISSION validatorS ----------
-class SiteNewsletterSubmissionValidator(ABC):
+# ---------- SITE NEWSLETTER-FORM-SUBMISSION VALIDATORS ----------
+class SiteNewsletterSignupValidator(ABC):
     """
     Base class storing common newsletter-form-submission validators across all of our
     partners.
     """
 
     @staticmethod
-    def has_nonempty_data(event: pd.Series) -> bool:
+    def has_data(event: pd.Series) -> bool:
         """
         Checks if a form-submission event actually has form HTML data.
         """
         # Should only be either dict or None because we'll perform this check
         # after the ConvertFieldTypes and ReplaceNaNs preprocessors
-        form_data_raw = cast(Optional[dict], event[FieldSnowplow.SEMISTRUCT_FORM_SUBMIT])
-        return form_data_raw is not None
+        return event[FieldSnowplow.SEMISTRUCT_FORM_SUBMIT] is not None
 
     @staticmethod
     def has_email_input(event: pd.Series) -> bool:
@@ -74,36 +76,88 @@ class SiteNewsletterSubmissionValidator(ABC):
         form_data = parse_form_submit_dict(event[FieldSnowplow.SEMISTRUCT_FORM_SUBMIT])
         return any([e.node_name == "INPUT" and e.type == "email" for e in form_data.elements])
 
-    @property
-    def validators(self) -> List[Callable[[pd.Series], bool]]:
-        """
-        List of individual validators used to check if a form-submission event is of a newsletter form.
-        It's supposed (but not required) to be extended (or superseded) by child classes of `SiteNewsletterFormValidator`.
-        """
-        return [self.has_nonempty_data, self.has_email_input]
-
+    @abstractmethod
     def validate(self, event: pd.Series) -> bool:
         """
-        Main verification method.
+        Main validation method.
 
         Checks if a form-submission event is of a newsletter form using a pre-specified
         list of individual validators. If one validator fails, it automatically fails.
         """
-        return all([validate(event) for validate in self.validators])
+        return self.has_data(event) and self.has_email_input(event)
 
 
-class AfroLaNewsletterSubmissionValidator(SiteNewsletterSubmissionValidator):
+class AfroLaNewsletterSignupValidator(SiteNewsletterSignupValidator):
     """
     Newsletter-form-submission validation logic for AfroLA.
     """
 
     @staticmethod
-    def has_correct_urlpath(event: pd.Series) -> bool:
+    def is_in_newsletter_page(event: pd.Series) -> bool:
         """
         Checks if the URL path where the form submission happens is correct.
         """
         return event[FieldSnowplow.PAGE_URLPATH] == "/subscribe"
 
-    @property
-    def validators(self) -> List[Callable[[pd.Series], bool]]:
-        return [*super().validators, self.has_correct_urlpath]
+    def validate(self, event: pd.Series) -> bool:
+        return super().validate(event) and self.is_in_newsletter_page(event)
+
+
+class DallasFreePressNewsletterSignupValidator(SiteNewsletterSignupValidator):
+    """
+    Newsletter-form-submission validation logic for DFP.
+    """
+
+    @staticmethod
+    def is_newsletter_inline_form(event: pd.Series) -> bool:
+        """
+        Checks if the HTML form is an inline Mailchimp newsletter form.
+        """
+        form_data = parse_form_submit_dict(event[FieldSnowplow.SEMISTRUCT_FORM_SUBMIT])
+        return form_data.form_id == "mc-embedded-subscribe-form"
+
+    def validate(self, event: pd.Series) -> bool:
+        return super().validate(event) and self.is_newsletter_inline_form(event)
+
+
+class OpenVallejoNewsletterSignupValidator(SiteNewsletterSignupValidator):
+    """
+    Newsletter-form-submission validation logic for OpenVallejo.
+    """
+
+    @staticmethod
+    def is_newsletter_inline_form(event: pd.Series) -> bool:
+        """
+        Checks if the HTML form is an inline Mailchimp newsletter form.
+        """
+        form_data = parse_form_submit_dict(event[FieldSnowplow.SEMISTRUCT_FORM_SUBMIT])
+        return form_data.form_id == "mc-embedded-subscribe-form"
+
+    @staticmethod
+    def is_newsletter_popup_form(event: pd.Series) -> bool:
+        """
+        Checks if the HTML form is a pop-up Mailchimp newsletter form.
+        """
+
+        # TODO once we have data for this kind of form in S3
+        pass
+
+    def validate(self, event: pd.Series) -> bool:
+        return super().validate(event) and (self.is_newsletter_inline_form(event) or self.is_newsletter_popup_form(event))
+
+
+class The19thNewsletterSignupValidator(SiteNewsletterSignupValidator):
+    """
+    Newsletter-form-submission validation logic for The 19th.
+    """
+
+    @staticmethod
+    def is_newsletter_form(event: pd.Series) -> bool:
+        """
+        Checks if the HTML form is a newsletter form via its ID.
+        """
+        form_data = parse_form_submit_dict(event[FieldSnowplow.SEMISTRUCT_FORM_SUBMIT])
+        return "newsletter" in form_data.form_id
+
+    def validate(self, event: pd.Series) -> bool:
+        return super().validate(event) and self.is_newsletter_form(event)
