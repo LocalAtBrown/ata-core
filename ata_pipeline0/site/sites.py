@@ -22,7 +22,7 @@ class Site(ABC):
     newsletter_signup_validator: SiteNewsletterSignupValidator
 
 
-class AfroLA(Site):
+class AfroLa(Site):
     """
     AfroLA site class.
     """
