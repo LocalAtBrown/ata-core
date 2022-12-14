@@ -312,7 +312,7 @@ class TestReplaceNaNs:
     def replace_with(self) -> str:
         return "woo"
 
-    def test_replace_nans(self, df, replace_with) -> None:
+    def test(self, df, replace_with) -> None:
         df = ReplaceNaNs(replace_with)(df)
         df_check = df.dropna()
         assert df.shape == df_check.shape
