@@ -1,6 +1,5 @@
 from abc import ABC
 from dataclasses import dataclass
-from typing import Dict
 
 from ata_pipeline0.site.names import SiteName
 from ata_pipeline0.site.newsletter import (
@@ -23,49 +22,37 @@ class Site(ABC):
     newsletter_signup_validator: SiteNewsletterSignupValidator
 
 
-@dataclass
-class AfroLa(Site):
+class AfroLA(Site):
     """
     AfroLA site class.
     """
 
-    name: SiteName = SiteName.AFRO_LA
-    newsletter_signup_validator: SiteNewsletterSignupValidator = AfroLaNewsletterSignupValidator()
+    name = SiteName.AFRO_LA
+    newsletter_signup_validator = AfroLaNewsletterSignupValidator()
 
 
-@dataclass
 class DallasFreePress(Site):
     """
     Dallas Free Press site class.
     """
 
-    name: SiteName = SiteName.DALLAS_FREE_PRESS
-    newsletter_signup_validator: SiteNewsletterSignupValidator = DallasFreePressNewsletterSignupValidator()
+    name = SiteName.DALLAS_FREE_PRESS
+    newsletter_signup_validator = DallasFreePressNewsletterSignupValidator()
 
 
-@dataclass
 class OpenVallejo(Site):
     """
     OpenVallejo site class.
     """
 
-    name: SiteName = SiteName.OPEN_VALLEJO
-    newsletter_signup_validator: SiteNewsletterSignupValidator = OpenVallejoNewsletterSignupValidator()
+    name = SiteName.OPEN_VALLEJO
+    newsletter_signup_validator = OpenVallejoNewsletterSignupValidator()
 
 
-@dataclass
 class The19th(Site):
     """
     The 19th site class.
     """
 
-    name: SiteName = SiteName.THE_19TH
-    newsletter_signup_validator: SiteNewsletterSignupValidator = The19thNewsletterSignupValidator()
-
-
-SITES: Dict[SiteName, Site] = {
-    SiteName.AFRO_LA: AfroLa(),
-    SiteName.DALLAS_FREE_PRESS: DallasFreePress(),
-    SiteName.OPEN_VALLEJO: OpenVallejo(),
-    SiteName.THE_19TH: The19th(),
-}
+    name = SiteName.THE_19TH
+    newsletter_signup_validator = The19thNewsletterSignupValidator()
