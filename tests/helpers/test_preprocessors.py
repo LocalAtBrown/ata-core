@@ -13,6 +13,7 @@ from pandas.api.types import (
 
 from ata_pipeline0.helpers.fields import FieldNew, FieldSnowplow
 from ata_pipeline0.helpers.preprocessors import (
+    AddFieldFormSubmitIsNewsletter,
     AddFieldSiteName,
     ConvertFieldTypes,
     DeleteRowsBot,
@@ -22,6 +23,65 @@ from ata_pipeline0.helpers.preprocessors import (
     SelectFieldsRelevant,
 )
 from ata_pipeline0.site.names import SiteName
+from ata_pipeline0.site.newsletter import SiteNewsletterSignupValidator
+
+
+@pytest.mark.unit
+class TestAddFieldFormSubmitIsNewsletter:
+    """
+    Unit tests for the `AddFieldFormSubmitIsNewsletter` preprocessor.
+
+    These only test the logic of the class's transformation method itself. Refer
+    to the tests in `tests/site/test_newsletter.py` for unit tests of site-specific
+    newsletter-signup validation logic.
+    """
+
+    # ---------- FIXTURES ---------
+    @pytest.fixture(scope="class")
+    def df(self, dummy_email) -> pd.DataFrame:
+        df = pd.DataFrame(
+            [
+                ["page_ping", None],
+                [
+                    "submit_form",
+                    "{'formId': '', 'formClasses': [], 'elements': [{'name': 'email', 'value': '%s', 'nodeName': 'INPUT', 'type': 'email'}]}"
+                    % dummy_email,
+                ],
+                ["submit_form", "{'formId': '', 'formClasses': [], 'elements': []}"],
+            ],
+            columns=[FieldSnowplow.EVENT_NAME, FieldSnowplow.SEMISTRUCT_FORM_SUBMIT],
+        )
+        return ConvertFieldTypes(
+            fields_int=set(),
+            fields_float=set(),
+            fields_datetime=set(),
+            fields_categorical=set(),
+            fields_json={FieldSnowplow.SEMISTRUCT_FORM_SUBMIT},
+        )(df)
+
+    class DummyNsv(SiteNewsletterSignupValidator):
+        def validate(self, event: pd.Series) -> bool:
+            return super().validate(event)
+
+    @pytest.fixture(scope="class")
+    def site_newsletter_signup_validator(self) -> SiteNewsletterSignupValidator:
+        return self.DummyNsv()
+
+    @pytest.fixture(scope="class")
+    def field_event_name(self) -> FieldSnowplow:
+        return FieldSnowplow.EVENT_NAME
+
+    @pytest.fixture(scope="class")
+    def field_form_submit_is_newsletter(self) -> FieldNew:
+        return FieldNew.FORM_SUBMIT_IS_NEWSLETTER
+
+    # ---------- TESTS ----------
+    def test(self, df, site_newsletter_signup_validator, field_event_name, field_form_submit_is_newsletter) -> None:
+        df = AddFieldFormSubmitIsNewsletter(
+            site_newsletter_signup_validator, field_event_name, field_form_submit_is_newsletter
+        )(df)
+
+        assert df[field_form_submit_is_newsletter].equals(pd.Series([None, True, False]))
 
 
 @pytest.mark.unit
