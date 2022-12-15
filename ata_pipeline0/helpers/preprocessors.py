@@ -214,7 +214,7 @@ class AddFieldFormSubmitIsNewsletter(Preprocessor):
         # this if memory is an issue
         df = df.copy()
 
-        df[self.field_form_submit_is_newsletter] = df.apply(self._is_newsletter_signup, axis=1)
+        df[self.field_form_submit_is_newsletter] = df.apply(self._is_newsletter_signup, axis=1).replace([np.nan], [None])
 
         return df
 
@@ -225,8 +225,7 @@ class AddFieldFormSubmitIsNewsletter(Preprocessor):
 
     def _is_newsletter_signup(self, event: pd.Series) -> Union[float, bool]:
         # Return np.nan if event is not a form-submission event
-        # (can't return None because it'll throw off mypy, but np.nan can be
-        # converted into None by the ReplaceNaNs preprocessor)
+        # (can't return None because it'll throw off mypy, will convert later into None)
         if event[self.field_event_name] != Event.SUBMIT_FORM:
             return np.nan
 
