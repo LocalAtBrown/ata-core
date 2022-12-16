@@ -21,7 +21,7 @@ from ata_pipeline0.helpers.preprocessors import (
     DeleteRowsDuplicateKey,
     DeleteRowsEmpty,
     ReplaceNaNs,
-    SelectFields,
+    SelectFieldsRelevant,
 )
 from ata_pipeline0.site.names import SiteName
 from ata_pipeline0.site.newsletter import SiteNewsletterSignupValidator
@@ -392,9 +392,9 @@ class TestReplaceNaNs:
 
 
 @pytest.mark.unit
-class TestSelectFields:
+class TestSelectFieldsRelevant:
     """
-    Unit tests for the `SelectFields` preprocessor.
+    Unit tests for the `SelectFieldsRelevant` preprocessor.
     """
 
     # ---------- FIXTURES ----------
@@ -417,5 +417,5 @@ class TestSelectFields:
 
     # ---------- TESTS ----------
     def test(self, df, fields_relevant) -> None:
-        df = SelectFields(fields_relevant)(df)
+        df = SelectFieldsRelevant(fields_relevant)(df)
         assert set(df.columns) == fields_relevant

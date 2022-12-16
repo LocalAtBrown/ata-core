@@ -17,7 +17,7 @@ from ata_pipeline0.helpers.preprocessors import (
     DeleteRowsDuplicateKey,
     DeleteRowsEmpty,
     ReplaceNaNs,
-    SelectFields,
+    SelectFieldsRelevant,
 )
 from ata_pipeline0.preprocess_events import preprocess_events
 from ata_pipeline0.site.sites import SITES, Site
@@ -53,7 +53,7 @@ def run_pipeline(
     df = preprocess_events(
         df,
         preprocessors=[
-            SelectFields(fields_relevant={*FieldSnowplow}),
+            SelectFieldsRelevant(fields_relevant={*FieldSnowplow}),
             DeleteRowsEmpty(
                 fields_required={
                     FieldSnowplow.DERIVED_TSTAMP,

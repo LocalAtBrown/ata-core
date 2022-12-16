@@ -206,24 +206,24 @@ class DeleteRowsEmpty(Preprocessor):
 
 
 @dataclass
-class SelectFields(Preprocessor):
+class SelectFieldsRelevant(Preprocessor):
     """
     Select relevant fields from an events DataFrame. If a field doesn't exist,
     it'll be added to the result DataFrame as an empty column.
     """
 
-    fields: Set[FieldSnowplow]
+    fields_relevant: Set[FieldSnowplow]
 
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
-        # Sometimes, df doesn't have all the fields, so we create an empty DataFrame
-        # with all the fields we'd like to have and concatenate df to it
-        df_empty_with_all_fields = pd.DataFrame(columns=[*self.fields])
-        # Get a list of fields in fields that are actually in df, because we
+        # Sometimes, df doesn't have all the fields in fields_relevant, so we create
+        # an empty DataFrame with all the fields we'd like to have and concatenate df to it
+        df_empty_with_all_fields = pd.DataFrame(columns=[*self.fields_relevant])
+        # Get a list of fields in fields_relevant that are actually in df, because we
         # don't want to query for nonexistent fields and have pandas raise a KeyError
-        fields_available = df.columns.intersection([*self.fields])
+        fields_available = df.columns.intersection([*self.fields_relevant])
 
         # Query for fields in fields_available and perform said concatenation, so that
-        # the final DataFrame will have all the fields in fields
+        # the final DataFrame will have all the fields in fields_relevant
         df = pd.concat([df_empty_with_all_fields, df[[*fields_available]]])
 
         return df
