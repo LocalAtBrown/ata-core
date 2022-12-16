@@ -1,6 +1,7 @@
 import pandas as pd
 import pytest
 
+from ata_pipeline0.helpers.events import EventName
 from ata_pipeline0.helpers.fields import FieldSnowplow
 from ata_pipeline0.site.names import SiteName
 from ata_pipeline0.site.newsletter import (
@@ -31,7 +32,7 @@ class TestSite:
                     "768",
                     "1366",
                     "2bba4051-c7f9-46cd-90bc-9b869a5fe187",
-                    "submit_form",
+                    EventName.SUBMIT_FORM,
                     "156f6713-4722-49cc-8335-721742f66525",
                     "https://www.afrolanews.org/",
                     "/subscribe",
@@ -103,7 +104,7 @@ class TestAfroLa:
                     "768",
                     "1366",
                     "2bba4051-c7f9-46cd-90bc-9b869a5fe187",
-                    "submit_form",
+                    EventName.SUBMIT_FORM,
                     "156f6713-4722-49cc-8335-721742f66525",
                     "https://www.afrolanews.org/",
                     "/subscribe",
@@ -156,7 +157,7 @@ class TestDallasFreePress:
                     "800",
                     "1280",
                     "8c62f083-539a-4158-bddd-ec83271639cd",
-                    "submit_form",
+                    EventName.SUBMIT_FORM,
                     "957e4dc1-2754-4213-949b-d5928d446911",
                     "https://dallasfreepress.com/dallas-news/dallas-forgot-remember-reclaim-lost-black-schools-education-history/",
                     "/text-and-email-notifications/",
@@ -220,7 +221,7 @@ class TestOpenVallejoNewsletterSignupValidators:
                     "693",
                     "320",
                     "dc2295e6-7e64-4f17-9df3-53466045eac9",
-                    "submit_form",
+                    EventName.SUBMIT_FORM,
                     "173295ed-93ac-4504-8dd8-d880f8d2c74e",
                     "https://openvallejo.org/donate/?mc_cid=396eb8ce49&mc_eid=3327a7bf29&utm_campaign=396eb8ce49-Vallejo+patrol+staffing+story_COPY_01&utm_medium=email&utm_source=Open+Vallejo&utm_term=0_5c634b5220-396eb8ce49-600953573",
                     "/newsletter/",
@@ -297,7 +298,7 @@ class TestThe19thNewsletterSignupValidators:
                     "1024",
                     "768",
                     "4d768aef-addc-4a3a-a133-1ea7fbd184f1",
-                    "submit_form",
+                    EventName.SUBMIT_FORM,
                     "b800111b-fe37-4f49-b0c9-61fbbcc5ff4a",
                     "https://www.google.com/",
                     "/2022/06/mayra-flores-record-women-congress/",

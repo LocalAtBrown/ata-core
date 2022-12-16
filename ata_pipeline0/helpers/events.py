@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class Event(str, Enum):
+class EventName(str, Enum):
     """
     Enum for Snowplow event names.
     """
