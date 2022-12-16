@@ -63,6 +63,7 @@ class The19th(Site):
     newsletter_signup_validator: SiteNewsletterSignupValidator = The19thNewsletterSignupValidator()
 
 
+# Site objects
 SITES: Dict[SiteName, Site] = {
     SiteName.AFRO_LA: AfroLa(),
     SiteName.DALLAS_FREE_PRESS: DallasFreePress(),
