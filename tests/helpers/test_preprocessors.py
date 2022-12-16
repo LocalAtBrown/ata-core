@@ -11,6 +11,7 @@ from pandas.api.types import (
     is_int64_dtype,
 )
 
+from ata_pipeline0.helpers.events import EventName
 from ata_pipeline0.helpers.fields import FieldNew, FieldSnowplow
 from ata_pipeline0.helpers.preprocessors import (
     AddFieldFormSubmitIsNewsletter,
@@ -41,13 +42,13 @@ class TestAddFieldFormSubmitIsNewsletter:
     def df(self, dummy_email) -> pd.DataFrame:
         df = pd.DataFrame(
             [
-                ["page_ping", None],
+                [EventName.PAGE_PING, None],
                 [
-                    "submit_form",
+                    EventName.SUBMIT_FORM,
                     "{'formId': '', 'formClasses': [], 'elements': [{'name': 'email', 'value': '%s', 'nodeName': 'INPUT', 'type': 'email'}]}"
                     % dummy_email,
                 ],
-                ["submit_form", "{'formId': '', 'formClasses': [], 'elements': []}"],
+                [EventName.SUBMIT_FORM, "{'formId': '', 'formClasses': [], 'elements': []}"],
             ],
             columns=[FieldSnowplow.EVENT_NAME, FieldSnowplow.SEMISTRUCT_FORM_SUBMIT],
         )
@@ -126,7 +127,7 @@ class TestConvertFieldTypes:
                     "1500",
                     None,
                     "2022-11-02T00:00:01.051Z",
-                    "page_ping",
+                    EventName.PAGE_PING,
                     None,
                 ],
                 [
@@ -134,7 +135,7 @@ class TestConvertFieldTypes:
                     None,
                     "400",
                     "2022-11-01T00:00:01.051Z",
-                    "submit_form",
+                    EventName.SUBMIT_FORM,
                     "{'field': 'value'}",
                 ],
                 [
@@ -142,7 +143,7 @@ class TestConvertFieldTypes:
                     "2000",
                     "200",
                     "2022-12-01T00:00:01.051Z",
-                    "focus_form",
+                    EventName.FOCUS_FORM,
                     None,
                 ],
                 [
@@ -319,21 +320,21 @@ class TestDeleteRowsEmpty:
                     "1500",
                     None,
                     "2022-11-02T00:00:01.051Z",
-                    "page_ping",
+                    EventName.PAGE_PING,
                 ],
                 [
                     "1",
                     None,
                     "400",
                     "2022-11-01T00:00:01.051Z",
-                    "submit_form",
+                    EventName.SUBMIT_FORM,
                 ],
                 [
                     "2",
                     "2000",
                     "200",
                     "2022-12-01T00:00:01.051Z",
-                    "focus_form",
+                    EventName.FOCUS_FORM,
                 ],
                 [
                     "1",
@@ -376,7 +377,7 @@ class TestReplaceNaNs:
     @pytest.fixture(scope="class")
     def df(self) -> pd.DataFrame:
         return pd.DataFrame(
-            [[np.nan, "page_ping"], [np.nan, np.nan]], columns=[FieldSnowplow.EVENT_ID, FieldSnowplow.EVENT_NAME]
+            [[np.nan, EventName.PAGE_PING], [np.nan, np.nan]], columns=[FieldSnowplow.EVENT_ID, FieldSnowplow.EVENT_NAME]
         )
 
     @pytest.fixture(scope="class")
@@ -403,7 +404,7 @@ class TestSelectFieldsRelevant:
             [
                 [
                     "2022-11-02T00:00:01.051Z",
-                    "page_ping",
+                    EventName.PAGE_PING,
                     None,
                 ]
             ],

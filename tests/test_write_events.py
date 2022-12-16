@@ -9,6 +9,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import sessionmaker
 
+from ata_pipeline0.helpers.events import EventName
 from ata_pipeline0.helpers.fields import FieldNew, FieldSnowplow
 from ata_pipeline0.site.names import SiteName
 from ata_pipeline0.write_events import write_events
@@ -30,7 +31,7 @@ def df(all_fields, preprocessor_convert_all_field_types) -> pd.DataFrame:
                 "736.0",
                 "414.0",
                 "3784c768-0eaf-407e-ac35-baa285bfba53",
-                "page_ping",
+                EventName.PAGE_PING,
                 "47a36759-7b59-4171-8db2-59fdbb0cde9a",
                 "https://duckduckgo.com/",
                 "/author/Diante-Marigny/",
@@ -51,7 +52,7 @@ def df(all_fields, preprocessor_convert_all_field_types) -> pd.DataFrame:
                 "600.0",
                 "800.0",
                 "74309984-1b10-445a-9b1a-e05ee448abd9",
-                "page_view",
+                EventName.PAGE_VIEW,
                 "70366c22-fff7-4ce1-8242-d7367a51dae7",
                 None,
                 "/west-dallas/west-dallas-history-environmental-injustice-timeline-concrete/",
@@ -72,7 +73,7 @@ def df(all_fields, preprocessor_convert_all_field_types) -> pd.DataFrame:
                 "900.0",
                 "1440.0",
                 "95d7ea22-76f9-4f34-8c6c-9197cbb4e9d4",
-                "submit_form",
+                EventName.SUBMIT_FORM,
                 "00ffcb05-8fe9-46b2-8c7f-0556012d617d",
                 None,
                 "/",
