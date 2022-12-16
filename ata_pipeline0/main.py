@@ -10,6 +10,7 @@ from sqlalchemy.orm import sessionmaker
 from ata_pipeline0.fetch_events import fetch_events
 from ata_pipeline0.helpers.fields import FieldNew, FieldSnowplow
 from ata_pipeline0.helpers.preprocessors import (
+    AddFieldFormSubmitIsNewsletter,
     AddFieldSiteName,
     ConvertFieldTypes,
     DeleteRowsBot,
@@ -19,7 +20,7 @@ from ata_pipeline0.helpers.preprocessors import (
     SelectFieldsRelevant,
 )
 from ata_pipeline0.preprocess_events import preprocess_events
-from ata_pipeline0.site.names import SiteName
+from ata_pipeline0.site.sites import SITES, Site
 from ata_pipeline0.write_events import write_events
 
 
@@ -27,13 +28,13 @@ def handler(event, context):
     # Note: this is invoked by an event-driven, async method (s3 trigger) so the return value is discarded
     # see here for example event structure: https://docs.aws.amazon.com/AmazonS3/latest/userguide/notification-content-structure.html
     bucket_name = event["Records"][0]["s3"]["bucket"]["name"]
-    site_name = SiteName(re.findall("lnl-snowplow-(.*)", bucket_name)[0])
+    site = SITES[re.findall("lnl-snowplow-(.*)", bucket_name)[0]]
     object_key = event["Records"][0]["s3"]["object"]["key"]
-    run_pipeline(site_name=site_name, object_key=object_key, concurrency=1)
+    run_pipeline(site=site, object_key=object_key, concurrency=1)
 
 
 def run_pipeline(
-    site_name: SiteName,
+    site: Site,
     timestamps: Optional[List[datetime]] = None,
     object_key: Optional[str] = None,
     concurrency: int = 4,
@@ -42,7 +43,7 @@ def run_pipeline(
     s3 = boto3.resource("s3")
     df = fetch_events(
         s3_resource=s3,
-        site_name=site_name,
+        site_name=site.name,
         timestamps=timestamps,
         object_key=object_key,
         num_concurrent_downloads=concurrency,
@@ -88,8 +89,13 @@ def run_pipeline(
                 field_primary_key=FieldSnowplow.EVENT_ID, field_timestamp=FieldSnowplow.DERIVED_TSTAMP
             ),
             DeleteRowsBot(field_useragent=FieldSnowplow.USERAGENT),
-            AddFieldSiteName(site_name, field_site_name=FieldNew.SITE_NAME),
+            AddFieldSiteName(site_name=site.name, field_site_name=FieldNew.SITE_NAME),
             ReplaceNaNs(replace_with=None),
+            AddFieldFormSubmitIsNewsletter(
+                site_newsletter_signup_validator=site.newsletter_signup_validator,
+                field_event_name=FieldSnowplow.EVENT_NAME,
+                field_form_submit_is_newsletter=FieldNew.FORM_SUBMIT_IS_NEWSLETTER,
+            ),
         ],
     )
 
