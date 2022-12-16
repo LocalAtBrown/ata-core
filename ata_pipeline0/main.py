@@ -53,7 +53,7 @@ def run_pipeline(
     df = preprocess_events(
         df,
         preprocessors=[
-            SelectFields(fields={*FieldSnowplow}),
+            SelectFields(fields_relevant={*FieldSnowplow}),
             DeleteRowsEmpty(
                 fields_required={
                     FieldSnowplow.DERIVED_TSTAMP,

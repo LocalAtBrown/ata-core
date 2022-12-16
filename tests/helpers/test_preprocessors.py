@@ -412,10 +412,10 @@ class TestSelectFields:
         )
 
     @pytest.fixture(scope="class")
-    def fields(self) -> Set[FieldSnowplow]:
+    def fields_relevant(self) -> Set[FieldSnowplow]:
         return {FieldSnowplow.DERIVED_TSTAMP, FieldSnowplow.EVENT_NAME}
 
     # ---------- TESTS ----------
-    def test(self, df, fields) -> None:
-        df = SelectFields(fields)(df)
-        assert set(df.columns) == fields
+    def test(self, df, fields_relevant) -> None:
+        df = SelectFields(fields_relevant)(df)
+        assert set(df.columns) == fields_relevant
