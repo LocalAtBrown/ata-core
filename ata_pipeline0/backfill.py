@@ -5,6 +5,7 @@ import click
 from ata_pipeline0.helpers.datetime import get_timestamps
 from ata_pipeline0.main import run_pipeline
 from ata_pipeline0.site.names import SiteName
+from ata_pipeline0.site.sites import SITES
 
 
 @click.command()
@@ -19,7 +20,7 @@ from ata_pipeline0.site.names import SiteName
 def backfill(start_date: datetime, days: int, site: SiteName):
     timestamps = get_timestamps(start_date=start_date, days=days)
     # call function that calls the whole process; handler should call the same fn
-    run_pipeline(site_name=site, timestamps=timestamps)
+    run_pipeline(site=SITES[site], timestamps=timestamps)
 
 
 if __name__ == "__main__":
