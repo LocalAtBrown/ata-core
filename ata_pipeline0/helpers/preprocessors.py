@@ -1,17 +1,15 @@
 import ast
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Dict, Set, Union
+from typing import Any, Dict, Set
 
 import numpy as np
 import pandas as pd
 import user_agents as ua
 
-from ata_pipeline0.helpers.events import EventName
 from ata_pipeline0.helpers.fields import FieldNew, FieldSnowplow
 from ata_pipeline0.helpers.logging import logging
-from ata_pipeline0.site.names import SiteName
-from ata_pipeline0.site.newsletter import SiteNewsletterSignupValidator
+from ata_pipeline0.helpers.site import SiteName
 
 logger = logging.getLogger(__name__)
 
@@ -46,58 +44,86 @@ class Preprocessor(ABC):
 
 
 @dataclass
-class AddFieldFormSubmitIsNewsletter(Preprocessor):
+class SelectFieldsRelevant(Preprocessor):
     """
-    Adds a field indicating whether a form-submission event is of a newsletter-signup form.
+    Select relevant fields from an events DataFrame. If a field doesn't exist,
+    it'll be added to the result DataFrame as an empty column.
     """
 
-    site_newsletter_signup_validator: SiteNewsletterSignupValidator
-    field_event_name: FieldSnowplow
-    field_form_submit_is_newsletter: FieldNew
+    fields_relevant: Set[FieldSnowplow]
 
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
-        # Make a copy of the original so that it's not affected, but can remove
-        # this if memory is an issue
-        df = df.copy()
+        # Sometimes, df doesn't have all the fields in fields_relevant, so we create
+        # an empty DataFrame with all the fields we'd like to have and concatenate df to it
+        df_empty_with_all_fields = pd.DataFrame(columns=[*self.fields_relevant])
+        # Get a list of fields in fields_relevant that are actually in df, because we
+        # don't want to query for nonexistent fields and have pandas raise a KeyError
+        fields_available = df.columns.intersection([*self.fields_relevant])
 
-        df[self.field_form_submit_is_newsletter] = df.apply(self._is_newsletter_signup, axis=1).replace([np.nan], [None])
+        # Query for fields in fields_available and perform said concatenation, so that
+        # the final DataFrame will have all the fields in fields_relevant
+        df = pd.concat([df_empty_with_all_fields, df[[*fields_available]]])
 
         return df
 
     def log_result(self, df_in=None, df_out=None) -> None:
-        logger.info(
-            f"Added a new field {self.field_form_submit_is_newsletter} to check if form-submission event is a newsletter signup"
-        )
-
-    def _is_newsletter_signup(self, event: pd.Series) -> Union[float, bool]:
-        # Return np.nan if event is not a form-submission event
-        # (can't return None because it'll throw off mypy, will convert later into None)
-        if event[self.field_event_name] != EventName.SUBMIT_FORM:
-            return np.nan
-
-        return self.site_newsletter_signup_validator.validate(event)
+        logger.info("Selected relevant fields")
 
 
 @dataclass
-class AddFieldSiteName(Preprocessor):
+class DeleteRowsEmpty(Preprocessor):
     """
-    Adds a constant field holding partner's name to the Snowplow events DataFrame.
+    Given a list of fields that cannot have empty or null data, remove all rows
+    with null values in any of these fields.
     """
 
-    site_name: SiteName
-    field_site_name: FieldNew
+    fields_required: Set[FieldSnowplow]
 
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
-        # Make a copy of the original so that it's not affected, but can remove
-        # this if memory is an issue
-        df = df.copy()
+        return df.dropna(subset=[*self.fields_required])
 
-        df[self.field_site_name] = self.site_name
+    def log_result(self, df_in: pd.DataFrame, df_out: pd.DataFrame) -> None:
+        logger.info(
+            f"Deleted {df_in.shape[0] - df_out.shape[0]} rows with at least 1 empty cell in a required field from staged DataFrame"
+        )
 
-        return df
 
-    def log_result(self, df_in=None, df_out=None) -> None:
-        logger.info(f"Added site name {self.site_name} as a new field")
+@dataclass
+class DeleteRowsDuplicateKey(Preprocessor):
+    """
+    Delete all rows whose primary key is repeated in the DataFrame.
+    """
+
+    field_primary_key: FieldSnowplow
+    field_timestamp: FieldSnowplow
+
+    def transform(self, df: pd.DataFrame) -> pd.DataFrame:
+        # Sort values by timestamp so the first event kept is the earliest,
+        # which is most likely to be a parent (if its key doesn't already exist
+        # in the DB)
+        # (see: https://snowplow.io/blog/dealing-with-duplicate-event-ids/)
+        df = df.sort_values(self.field_timestamp)
+        return df.drop_duplicates(subset=[self.field_primary_key], keep="first")
+
+    def log_result(self, df_in: pd.DataFrame, df_out: pd.DataFrame) -> None:
+        logger.info(
+            f"Deleted {df_in.shape[0] - df_out.shape[0]} rows with duplicate {self.field_primary_key} from staged DataFrame"
+        )
+
+
+@dataclass
+class DeleteRowsBot(Preprocessor):
+    """
+    Delete all rows where the event is made by a bot.
+    """
+
+    field_useragent: FieldSnowplow
+
+    def transform(self, df: pd.DataFrame) -> pd.DataFrame:
+        return df[df[self.field_useragent].apply(lambda x: not ua.parse(x).is_bot)]
+
+    def log_result(self, df_in: pd.DataFrame, df_out: pd.DataFrame) -> None:
+        logger.info(f"Deleted {df_in.shape[0] - df_out.shape[0]} rows whose event is made by a bot")
 
 
 @dataclass
@@ -150,86 +176,25 @@ class ConvertFieldTypes(Preprocessor):
 
 
 @dataclass
-class DeleteRowsBot(Preprocessor):
+class AddFieldSiteName(Preprocessor):
     """
-    Delete all rows where the event is made by a bot.
+    Adds a constant field holding partner's name to the Snowplow events DataFrame.
     """
 
-    field_useragent: FieldSnowplow
+    site_name: SiteName
+    field_site_name: FieldNew
 
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
-        return df[df[self.field_useragent].apply(lambda x: not ua.parse(x).is_bot)]
+        # Make a copy of the original so that it's not affected, but can remove
+        # this if memory is an issue
+        df = df.copy()
 
-    def log_result(self, df_in: pd.DataFrame, df_out: pd.DataFrame) -> None:
-        logger.info(f"Deleted {df_in.shape[0] - df_out.shape[0]} rows whose event is made by a bot")
-
-
-@dataclass
-class DeleteRowsDuplicateKey(Preprocessor):
-    """
-    Delete all rows whose primary key is repeated in the DataFrame.
-    """
-
-    field_primary_key: FieldSnowplow
-    field_timestamp: FieldSnowplow
-
-    def transform(self, df: pd.DataFrame) -> pd.DataFrame:
-        # Sort values by timestamp so the first event kept is the earliest,
-        # which is most likely to be a parent (if its key doesn't already exist
-        # in the DB)
-        # (see: https://snowplow.io/blog/dealing-with-duplicate-event-ids/)
-        df = df.sort_values(self.field_timestamp)
-        return df.drop_duplicates(subset=[self.field_primary_key], keep="first")
-
-    def log_result(self, df_in: pd.DataFrame, df_out: pd.DataFrame) -> None:
-        logger.info(
-            f"Deleted {df_in.shape[0] - df_out.shape[0]} rows with duplicate {self.field_primary_key} from staged DataFrame"
-        )
-
-
-@dataclass
-class DeleteRowsEmpty(Preprocessor):
-    """
-    Given a list of fields that cannot have empty or null data, remove all rows
-    with null values in any of these fields.
-    """
-
-    fields_required: Set[FieldSnowplow]
-
-    def transform(self, df: pd.DataFrame) -> pd.DataFrame:
-        return df.dropna(subset=[*self.fields_required])
-
-    def log_result(self, df_in: pd.DataFrame, df_out: pd.DataFrame) -> None:
-        logger.info(
-            f"Deleted {df_in.shape[0] - df_out.shape[0]} rows with at least 1 empty cell in a required field from staged DataFrame"
-        )
-
-
-@dataclass
-class SelectFieldsRelevant(Preprocessor):
-    """
-    Select relevant fields from an events DataFrame. If a field doesn't exist,
-    it'll be added to the result DataFrame as an empty column.
-    """
-
-    fields_relevant: Set[FieldSnowplow]
-
-    def transform(self, df: pd.DataFrame) -> pd.DataFrame:
-        # Sometimes, df doesn't have all the fields in fields_relevant, so we create
-        # an empty DataFrame with all the fields we'd like to have and concatenate df to it
-        df_empty_with_all_fields = pd.DataFrame(columns=[*self.fields_relevant])
-        # Get a list of fields in fields_relevant that are actually in df, because we
-        # don't want to query for nonexistent fields and have pandas raise a KeyError
-        fields_available = df.columns.intersection([*self.fields_relevant])
-
-        # Query for fields in fields_available and perform said concatenation, so that
-        # the final DataFrame will have all the fields in fields_relevant
-        df = pd.concat([df_empty_with_all_fields, df[[*fields_available]]])
+        df[self.field_site_name] = self.site_name
 
         return df
 
     def log_result(self, df_in=None, df_out=None) -> None:
-        logger.info("Selected relevant fields")
+        logger.info(f"Added site name {self.site_name} as a new field")
 
 
 @dataclass

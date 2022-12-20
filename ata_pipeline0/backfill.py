@@ -3,8 +3,8 @@ from datetime import datetime, timedelta
 import click
 
 from ata_pipeline0.helpers.datetime import get_timestamps
+from ata_pipeline0.helpers.site import SiteName
 from ata_pipeline0.main import run_pipeline
-from ata_pipeline0.site.names import SiteName
 
 
 @click.command()

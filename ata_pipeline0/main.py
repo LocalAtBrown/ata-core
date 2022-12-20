@@ -18,8 +18,8 @@ from ata_pipeline0.helpers.preprocessors import (
     ReplaceNaNs,
     SelectFieldsRelevant,
 )
+from ata_pipeline0.helpers.site import SiteName
 from ata_pipeline0.preprocess_events import preprocess_events
-from ata_pipeline0.site.names import SiteName
 from ata_pipeline0.write_events import write_events
 
 

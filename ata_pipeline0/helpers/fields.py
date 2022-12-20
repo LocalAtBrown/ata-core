@@ -79,6 +79,3 @@ class FieldNew(str, Enum):
 
     # [STR] Site partner's name (as a slug corresponding to its S3 bucket)
     SITE_NAME = "site_name"
-
-    # [BOOLEAN] Whether form submission event is of a newsletter form. NULL if event isn't form submission
-    FORM_SUBMIT_IS_NEWSLETTER = "form_submit_is_newsletter"
