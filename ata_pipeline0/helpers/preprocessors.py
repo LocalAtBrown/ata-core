@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import user_agents as ua
 
-from ata_pipeline0.helpers.events import EventName
+from ata_pipeline0.helpers.events import Event
 from ata_pipeline0.helpers.fields import FieldNew, FieldSnowplow
 from ata_pipeline0.helpers.logging import logging
 from ata_pipeline0.site.names import SiteName
@@ -72,7 +72,7 @@ class AddFieldFormSubmitIsNewsletter(Preprocessor):
     def _is_newsletter_signup(self, event: pd.Series) -> Union[float, bool]:
         # Return np.nan if event is not a form-submission event
         # (can't return None because it'll throw off mypy, will convert later into None)
-        if event[self.field_event_name] != EventName.SUBMIT_FORM:
+        if event[self.field_event_name] != Event.SUBMIT_FORM:
             return np.nan
 
         return self.site_newsletter_signup_validator.validate(event)
