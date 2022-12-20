@@ -12,6 +12,11 @@ from ata_pipeline0.site.newsletter import (
 )
 
 
+@pytest.fixture(scope="module")
+def dummy_email() -> str:
+    return "dummy@dummydomain.com"
+
+
 @pytest.mark.unit
 class TestSite:
     """

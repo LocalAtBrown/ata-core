@@ -49,8 +49,3 @@ def preprocessor_convert_all_field_types() -> ConvertFieldTypes:
             FieldSnowplow.SEMISTRUCT_FORM_SUBMIT,
         },
     )
-
-
-@pytest.fixture(scope="package")
-def dummy_email() -> str:
-    return "dummy@dummydomain.com"
