@@ -55,7 +55,10 @@ def fetch_events(
     with ThreadPoolExecutor(max_workers=num_concurrent_downloads) as executor:
         dfs = executor.map(_fetch_decompress_parse, object_summaries)
 
-    df = pd.concat(dfs)
+    try:
+        df = pd.concat(dfs)
+    except ValueError:
+        df = pd.DataFrame()
     logger.info(f"Fetched DataFrame shape: {df.shape}")
 
     return df
