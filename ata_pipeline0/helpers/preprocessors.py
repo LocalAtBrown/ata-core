@@ -120,7 +120,16 @@ class DeleteRowsBot(Preprocessor):
     field_useragent: FieldSnowplow
 
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
-        return df[df[self.field_useragent].apply(lambda x: not ua.parse(x).is_bot)]
+        return df[df[self.field_useragent].apply(self._safe_bot_check)]
+
+    @staticmethod
+    def _safe_bot_check(user_agent_string: Any):
+        try:
+            return not ua.parse(user_agent_string).is_bot
+        except TypeError:
+            # in this case, the user agent is not an expected type (a string). Assume that means abnormal behavior,
+            # so assume that means it is a bot; as such, we return False
+            return False
 
     def log_result(self, df_in: pd.DataFrame, df_out: pd.DataFrame) -> None:
         logger.info(f"Deleted {df_in.shape[0] - df_out.shape[0]} rows whose event is made by a bot")
