@@ -63,13 +63,14 @@ def run_pipeline(
                     FieldSnowplow.DVCE_SCREENWIDTH,
                     FieldSnowplow.EVENT_ID,
                     FieldSnowplow.EVENT_NAME,
-                    FieldSnowplow.NETWORK_USERID,
                     FieldSnowplow.PAGE_URLPATH,
                 }
             ),
             ConvertFieldTypes(
                 fields_int={FieldSnowplow.DOMAIN_SESSIONIDX},
                 fields_float={
+                    FieldSnowplow.BR_VIEWHEIGHT,
+                    FieldSnowplow.BR_VIEWWIDTH,
                     FieldSnowplow.DOC_HEIGHT,
                     FieldSnowplow.DVCE_SCREENHEIGHT,
                     FieldSnowplow.DVCE_SCREENWIDTH,
@@ -78,8 +79,6 @@ def run_pipeline(
                 fields_datetime={FieldSnowplow.DERIVED_TSTAMP},
                 fields_categorical={FieldSnowplow.EVENT_NAME, FieldSnowplow.REFR_MEDIUM, FieldSnowplow.REFR_SOURCE},
                 fields_json={
-                    FieldSnowplow.SEMISTRUCT_FORM_CHANGE,
-                    FieldSnowplow.SEMISTRUCT_FORM_FOCUS,
                     FieldSnowplow.SEMISTRUCT_FORM_SUBMIT,
                 },
             ),
