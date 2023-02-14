@@ -1,7 +1,21 @@
-from enum import Enum
+from enum import Enum, auto
+from typing import Any
 
 
-class FieldSnowplow(str, Enum):
+class _StrEnum(str, Enum):
+    """
+    StrEnum class. Replace with built-in version after upgrading to Python 3.10.
+    """
+
+    @staticmethod
+    def _generate_next_value_(name: str, *args: Any, **kwargs: Any) -> str:
+        return name.lower()
+
+    def __str__(self) -> str:
+        return f"{self.value}"
+
+
+class FieldSnowplow(_StrEnum):
     """
     Enum for Snowplow fields of interest.
     Snowplow documentation of these fields can be found here: https://docs.snowplow.io/docs/understanding-your-pipeline/canonical-event/.
@@ -12,70 +26,82 @@ class FieldSnowplow(str, Enum):
     https://stackoverflow.com/questions/58608361/string-based-enum-in-python.)
     """
 
+    # [FLOAT] Browser viewport height in pixels
+    BR_VIEWHEIGHT = auto()
+
+    # [FLOAT] Browser viewport width in pixels
+    BR_VIEWWIDTH = auto()
+
     # [DATETIME] Timestamp making allowance for innaccurate device clock
-    DERIVED_TSTAMP = "derived_tstamp"
+    DERIVED_TSTAMP = auto()
 
     # [FLOAT] The page's height in pixels
-    DOC_HEIGHT = "doc_height"
+    DOC_HEIGHT = auto()
 
     # [INT] Number of the current user session, e.g. first session is 1, next session is 2, etc. Dependent on domain_userid
-    DOMAIN_SESSIONIDX = "domain_sessionidx"
+    DOMAIN_SESSIONIDX = auto()
 
     # [STR, CATEGORICAL if needed] User ID set by Snowplow using 1st party cookie
-    DOMAIN_USERID = "domain_userid"
+    DOMAIN_USERID = auto()
 
     # [FLOAT] Screen height in pixels. Almost 1-to-1 relationship with domain_userid (there are exceptions)
-    DVCE_SCREENHEIGHT = "dvce_screenheight"
+    DVCE_SCREENHEIGHT = auto()
 
     # [FLOAT] Screen width in pixels. Almost 1-to-1 relationship with domain_userid (there are exceptions)
-    DVCE_SCREENWIDTH = "dvce_screenwidth"
+    DVCE_SCREENWIDTH = auto()
 
     # [STR] ID of event. This would be the primary key within the site DataFrame,
     # and part of the [site_name, event_id] composite key in the database table
-    EVENT_ID = "event_id"
+    EVENT_ID = auto()
 
     # [STR, CATEGORICAL] Name of event. Can be "page_view", "page_ping", "focus_form", "change_form", "submit_form"
-    EVENT_NAME = "event_name"
+    EVENT_NAME = auto()
 
     # [STR, CATEGORICAL if needed] User ID set by Snowplow using 3rd party cookie
-    NETWORK_USERID = "network_userid"
+    # NETWORK_USERID = auto()
 
     # [STR, CATEGORICAL if needed] Path to page, e.g., /event-directory/ in https://dallasfreepress.com/event-directory/
-    PAGE_URLPATH = "page_urlpath"
+    PAGE_URLPATH = auto()
 
     # [STR] URL of the referrer
-    PAGE_REFERRER = "page_referrer"
+    # PAGE_REFERRER = auto()
 
     # [FLOAT] Maximum page y-offset seen in the last ping period. Depends on event_name == "page_ping"
-    PP_YOFFSET_MAX = "pp_yoffset_max"
+    PP_YOFFSET_MAX = auto()
 
     # [STR, CATEGORICAL] Type of referer. Can be "social", "search", "internal", "unknown", "email"
     # (read: https://docs.snowplow.io/docs/enriching-your-data/available-enrichments/referrer-parser-enrichment/)
-    REFR_MEDIUM = "refr_medium"
+    REFR_MEDIUM = auto()
 
     # [STR, CATEGORICAL] Name of referer if recognised, e.g., "Google" or "Bing"
-    REFR_SOURCE = "refr_source"
+    REFR_SOURCE = auto()
+
+    # [STR] Referrer URL host
+    REFR_URLHOST = auto()
+
+    # [STR] Referrer URL path
+    REFR_URLPATH = auto()
 
     # [STR (JSON)] Data/attributes of HTML input and its form in JSON format. Only present if event_name == "change_form"
     # (read: https://github.com/snowplow/iglu-central/blob/master/schemas/com.snowplowanalytics.snowplow/change_form/jsonschema/1-0-0)
-    SEMISTRUCT_FORM_CHANGE = "unstruct_event_com_snowplowanalytics_snowplow_change_form_1"
+    # SEMISTRUCT_FORM_CHANGE = "unstruct_event_com_snowplowanalytics_snowplow_change_form_1"
 
     # [STR (JSON)] Data/attributes of HTML input and its form in JSON format. Only present if event_name == "focus_form"
     # (read: https://github.com/snowplow/iglu-central/blob/master/schemas/com.snowplowanalytics.snowplow/focus_form/jsonschema/1-0-0)
-    SEMISTRUCT_FORM_FOCUS = "unstruct_event_com_snowplowanalytics_snowplow_focus_form_1"
+    # SEMISTRUCT_FORM_FOCUS = "unstruct_event_com_snowplowanalytics_snowplow_focus_form_1"
 
     # [STR (JSON)] Data/attributes of HTML form and all its inputs in JSON format. Only present if event_name == "submit_form"
     # (read: https://github.com/snowplow/iglu-central/blob/master/schemas/com.snowplowanalytics.snowplow/submit_form/jsonschema/1-0-0)
     SEMISTRUCT_FORM_SUBMIT = "unstruct_event_com_snowplowanalytics_snowplow_submit_form_1"
 
     # [STR] Raw useragent
-    USERAGENT = "useragent"
+    USERAGENT = auto()
 
 
-class FieldNew(str, Enum):
+class FieldNew(_StrEnum):
     """
     Enum for non-Snowplow fields to be added.
     """
 
     # [STR] Site partner's name (as a slug corresponding to its S3 bucket)
-    SITE_NAME = "site_name"
+    SITE_NAME = auto()
