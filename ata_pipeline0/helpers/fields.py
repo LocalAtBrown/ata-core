@@ -57,14 +57,8 @@ class FieldSnowplow(_StrEnum):
     # [STR, CATEGORICAL] Name of event. Can be "page_view", "page_ping", "focus_form", "change_form", "submit_form"
     EVENT_NAME = auto()
 
-    # [STR, CATEGORICAL if needed] User ID set by Snowplow using 3rd party cookie
-    # NETWORK_USERID = auto()
-
     # [STR, CATEGORICAL if needed] Path to page, e.g., /event-directory/ in https://dallasfreepress.com/event-directory/
     PAGE_URLPATH = auto()
-
-    # [STR] URL of the referrer
-    # PAGE_REFERRER = auto()
 
     # [FLOAT] Maximum page y-offset seen in the last ping period. Depends on event_name == "page_ping"
     PP_YOFFSET_MAX = auto()
@@ -81,14 +75,6 @@ class FieldSnowplow(_StrEnum):
 
     # [STR] Referrer URL path
     REFR_URLPATH = auto()
-
-    # [STR (JSON)] Data/attributes of HTML input and its form in JSON format. Only present if event_name == "change_form"
-    # (read: https://github.com/snowplow/iglu-central/blob/master/schemas/com.snowplowanalytics.snowplow/change_form/jsonschema/1-0-0)
-    # SEMISTRUCT_FORM_CHANGE = "unstruct_event_com_snowplowanalytics_snowplow_change_form_1"
-
-    # [STR (JSON)] Data/attributes of HTML input and its form in JSON format. Only present if event_name == "focus_form"
-    # (read: https://github.com/snowplow/iglu-central/blob/master/schemas/com.snowplowanalytics.snowplow/focus_form/jsonschema/1-0-0)
-    # SEMISTRUCT_FORM_FOCUS = "unstruct_event_com_snowplowanalytics_snowplow_focus_form_1"
 
     # [STR (JSON)] Data/attributes of HTML form and all its inputs in JSON format. Only present if event_name == "submit_form"
     # (read: https://github.com/snowplow/iglu-central/blob/master/schemas/com.snowplowanalytics.snowplow/submit_form/jsonschema/1-0-0)
