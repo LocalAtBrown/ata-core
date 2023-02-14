@@ -85,7 +85,7 @@ def df(key_duplicate) -> pd.DataFrame:
             FieldSnowplow.PP_YOFFSET_MAX,
             FieldSnowplow.DERIVED_TSTAMP,
             FieldSnowplow.EVENT_NAME,
-            FieldSnowplow.SEMISTRUCT_FORM_FOCUS,
+            FieldSnowplow.SEMISTRUCT_FORM_SUBMIT,
             FieldSnowplow.USERAGENT,
         ],
     )
@@ -140,7 +140,7 @@ def fields_categorical() -> Set[FieldSnowplow]:
 
 @pytest.fixture(scope="module")
 def fields_json() -> Set[FieldSnowplow]:
-    return {FieldSnowplow.SEMISTRUCT_FORM_FOCUS}
+    return {FieldSnowplow.SEMISTRUCT_FORM_SUBMIT}
 
 
 @pytest.fixture(scope="module")
