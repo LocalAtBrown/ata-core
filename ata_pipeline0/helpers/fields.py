@@ -57,6 +57,9 @@ class FieldSnowplow(_StrEnum):
     # [STR, CATEGORICAL] Name of event. Can be "page_view", "page_ping", "focus_form", "change_form", "submit_form"
     EVENT_NAME = auto()
 
+    # [STR] URL of the referrer
+    PAGE_REFERRER = auto()
+
     # [STR, CATEGORICAL if needed] Path to page, e.g., /event-directory/ in https://dallasfreepress.com/event-directory/
     PAGE_URLPATH = auto()
 
