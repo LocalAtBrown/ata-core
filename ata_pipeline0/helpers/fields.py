@@ -60,8 +60,14 @@ class FieldSnowplow(_StrEnum):
     # [STR] URL of the referrer
     PAGE_REFERRER = auto()
 
+    # [STR] URL fragment of page, e.g., about in https://dallasfreepress.com/#about
+    PAGE_URLFRAGMENT = auto()
+
     # [STR, CATEGORICAL if needed] Path to page, e.g., /event-directory/ in https://dallasfreepress.com/event-directory/
     PAGE_URLPATH = auto()
+
+    # [STR] Query string of page URL, e.g., ?utm_source=google&utm_medium=cpc&utm_campaign=brand
+    PAGE_URLQUERY = auto()
 
     # [FLOAT] Maximum page y-offset seen in the last ping period. Depends on event_name == "page_ping"
     PP_YOFFSET_MAX = auto()
@@ -76,8 +82,14 @@ class FieldSnowplow(_StrEnum):
     # [STR] Referrer URL host
     REFR_URLHOST = auto()
 
+    # [STR] Referrer URL fragment
+    REFR_URLFRAGMENT = auto()
+
     # [STR] Referrer URL path
     REFR_URLPATH = auto()
+
+    # [STR] Referrer URL query string
+    REFR_URLQUERY = auto()
 
     # [STR (JSON)] Data/attributes of HTML form and all its inputs in JSON format. Only present if event_name == "submit_form"
     # (read: https://github.com/snowplow/iglu-central/blob/master/schemas/com.snowplowanalytics.snowplow/submit_form/jsonschema/1-0-0)
