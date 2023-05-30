@@ -2,14 +2,14 @@
 
 [[package]]
 name = "ata-db-models"
-version = "0.0.17"
+version = "0.0.18"
 description = "Database models and migrations for Automating the Ask."
 category = "main"
 optional = false
 python-versions = ">=3.9,<3.10"
 files = [
-    {file = "ata_db_models-0.0.17-py3-none-any.whl", hash = "sha256:863bc371f32dc5cdb9046d932828d0e91ea8eb5ab5c87b022e7bb3c5a29a32df"},
-    {file = "ata_db_models-0.0.17.tar.gz", hash = "sha256:9e8616deaeffec051810890f7ceb705c1537a058eec1c99c85d406df1d48b6f7"},
+    {file = "ata_db_models-0.0.18-py3-none-any.whl", hash = "sha256:dec7bae24567695f89ce7f206594b31ce0437fded78a99cf7aa4898f9ffdef68"},
+    {file = "ata_db_models-0.0.18.tar.gz", hash = "sha256:e6359040476f78310e31198dd7376efa9259ebaafe951555100b4579cef1bdb1"},
 ]
 
 [package.dependencies]
@@ -405,14 +405,14 @@ xray = ["mypy-boto3-xray (>=1.26.0,<1.27.0)"]
 
 [[package]]
 name = "botocore"
-version = "1.29.142"
+version = "1.29.143"
 description = "Low-level, data-driven core of boto 3."
 category = "main"
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "botocore-1.29.142-py3-none-any.whl", hash = "sha256:0677848bb8ef94d69c5d2f5c613dbab5b6710a8b7649f3fafca5172c464728b8"},
-    {file = "botocore-1.29.142.tar.gz", hash = "sha256:512d2f48fc1471f169bc210eede662f8da66be3cebc1515dfb5411a18b2aeabf"},
+    {file = "botocore-1.29.143-py3-none-any.whl", hash = "sha256:fcb424c750a78a9f86b5ee8319bfa20de8528a80aadcdd171910bcb8d45c3055"},
+    {file = "botocore-1.29.143.tar.gz", hash = "sha256:e5b8dd2fa750f0476667753dc018c2b14a542fec7e20edd3a7613b6d2df2c32a"},
 ]
 
 [package.dependencies]
@@ -1380,4 +1380,4 @@ test = ["covdefaults (>=2.3)", "coverage (>=7.2.3)", "coverage-enable-subprocess
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9, <3.10"
-content-hash = "9db41fa5586da8c6ea57b6bc7ae6f7eb67f8df099ceb327d144d27500c8c9654"
+content-hash = "c595160782812592ec1895990aa20337e36803f201d0e330c8a90b0ab309e1cf"
