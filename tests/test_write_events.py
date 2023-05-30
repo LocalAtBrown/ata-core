@@ -44,6 +44,10 @@ def df() -> pd.DataFrame:
                 "https://fakehost.com",
                 "/",
                 SiteName.DALLAS_FREE_PRESS,
+                None,
+                None,
+                None,
+                None,
             ],
             [
                 "600.0",
@@ -66,6 +70,10 @@ def df() -> pd.DataFrame:
                 "https://fakehost.com",
                 "/a/b/c/d.md",
                 SiteName.AFRO_LA,
+                None,
+                None,
+                None,
+                None,
             ],
             [
                 "900.0",
@@ -88,6 +96,10 @@ def df() -> pd.DataFrame:
                 None,
                 None,
                 SiteName.DALLAS_FREE_PRESS,
+                "dummyfragmentsection",
+                "?query=dummy&other=stuff",
+                "refrdummyfragmentsection",
+                "?refrquery=dummy&other=stuff",
             ],
         ],
         columns=[
@@ -111,6 +123,10 @@ def df() -> pd.DataFrame:
             FieldSnowplow.REFR_URLHOST,
             FieldSnowplow.REFR_URLPATH,
             FieldNew.SITE_NAME,
+            FieldSnowplow.PAGE_URLFRAGMENT,
+            FieldSnowplow.PAGE_URLQUERY,
+            FieldSnowplow.REFR_URLFRAGMENT,
+            FieldSnowplow.REFR_URLQUERY,
         ],
     )
 
