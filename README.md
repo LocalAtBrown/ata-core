@@ -69,6 +69,12 @@ to run tests in a specific directory/file/module. You can also run `pytest -m un
 `pytest -m integration` to run only integration tests. We run continuous integration (CI) via GitHub actions. We have
 actions to run MyPy and run the tests.
 
+Running integration tests requires a postgres instance. An easy way to spin one up is via Docker:
+`docker run --rm --name postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_HOST_AUTH_METHOD=trust -p 127.0.0.1:5432:5432/tcp postgres`
+
+Notably, the host is `127.0.0.1`, the port is `5432`, the username, password, and db name are all "postgres". You can
+override these with environment variables for `HOST`, `PORT`, `USERNAME`, `PASSWORD`, and `DB_NAME`.
+
 ## Deployment
 
 Deployment for the Local News Lab (LNL) is handled via AWS CodePipeline, defined elsewhere in the ata-infrastructure repo.
