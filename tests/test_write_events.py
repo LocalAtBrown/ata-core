@@ -48,6 +48,8 @@ def df() -> pd.DataFrame:
                 None,
                 None,
                 None,
+                "https://fakehost.com/a/b/c/d.md",
+                "fakehost.com",
             ],
             [
                 "600.0",
@@ -74,6 +76,8 @@ def df() -> pd.DataFrame:
                 None,
                 None,
                 None,
+                "https://fakehost.com/a/b/c/d.md",
+                "fakehost.com",
             ],
             [
                 "900.0",
@@ -100,6 +104,8 @@ def df() -> pd.DataFrame:
                 "?query=dummy&other=stuff",
                 "refrdummyfragmentsection",
                 "?refrquery=dummy&other=stuff",
+                "https://dallasfreepress.com/",
+                "dallasfreepress.com",
             ],
         ],
         columns=[
@@ -127,6 +133,8 @@ def df() -> pd.DataFrame:
             FieldSnowplow.PAGE_URLQUERY,
             FieldSnowplow.REFR_URLFRAGMENT,
             FieldSnowplow.REFR_URLQUERY,
+            FieldSnowplow.PAGE_URL,
+            FieldSnowplow.PAGE_URLHOST,
         ],
     )
 

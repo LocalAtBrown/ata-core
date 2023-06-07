@@ -60,8 +60,14 @@ class FieldSnowplow(_StrEnum):
     # [STR] URL of the referrer
     PAGE_REFERRER = auto()
 
+    # [STR] Full URL of the page
+    PAGE_URL = auto()
+
     # [STR] URL fragment of page, e.g., about in https://dallasfreepress.com/#about
     PAGE_URLFRAGMENT = auto()
+
+    # [STR, CATEGORICAL if needed] Host of page, e.g., dallasfreepress.com in https://dallasfreepress.com/
+    PAGE_URLHOST = auto()
 
     # [STR, CATEGORICAL if needed] Path to page, e.g., /event-directory/ in https://dallasfreepress.com/event-directory/
     PAGE_URLPATH = auto()
