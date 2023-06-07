@@ -2,14 +2,14 @@
 
 [[package]]
 name = "ata-db-models"
-version = "0.0.18"
+version = "0.0.19"
 description = "Database models and migrations for Automating the Ask."
 category = "main"
 optional = false
 python-versions = ">=3.9,<3.10"
 files = [
-    {file = "ata_db_models-0.0.18-py3-none-any.whl", hash = "sha256:dec7bae24567695f89ce7f206594b31ce0437fded78a99cf7aa4898f9ffdef68"},
-    {file = "ata_db_models-0.0.18.tar.gz", hash = "sha256:e6359040476f78310e31198dd7376efa9259ebaafe951555100b4579cef1bdb1"},
+    {file = "ata_db_models-0.0.19-py3-none-any.whl", hash = "sha256:65fb18f013d5ee4dffc95ba0c65ebfe3d532e189c40559301e1854b51ee8a9ae"},
+    {file = "ata_db_models-0.0.19.tar.gz", hash = "sha256:92e8894b46995850e73e513f7f20ea9f2b7f0678f600a3ea5b63fe68e22ad0b0"},
 ]
 
 [package.dependencies]
@@ -405,14 +405,14 @@ xray = ["mypy-boto3-xray (>=1.26.0,<1.27.0)"]
 
 [[package]]
 name = "botocore"
-version = "1.29.143"
+version = "1.29.148"
 description = "Low-level, data-driven core of boto 3."
 category = "main"
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "botocore-1.29.143-py3-none-any.whl", hash = "sha256:fcb424c750a78a9f86b5ee8319bfa20de8528a80aadcdd171910bcb8d45c3055"},
-    {file = "botocore-1.29.143.tar.gz", hash = "sha256:e5b8dd2fa750f0476667753dc018c2b14a542fec7e20edd3a7613b6d2df2c32a"},
+    {file = "botocore-1.29.148-py3-none-any.whl", hash = "sha256:71c512fbd42e0ef171388b53bf82f9cb9e66283467156917b69717daeb05eba6"},
+    {file = "botocore-1.29.148.tar.gz", hash = "sha256:36bccc4e094faf1bfbda2241eb1c71e72a63f3c12b2adfc4c3cbd02349bc416b"},
 ]
 
 [package.dependencies]
@@ -425,14 +425,14 @@ crt = ["awscrt (==0.16.9)"]
 
 [[package]]
 name = "botocore-stubs"
-version = "1.29.142"
+version = "1.29.148"
 description = "Type annotations and code completion for botocore"
 category = "main"
 optional = false
 python-versions = ">=3.7,<4.0"
 files = [
-    {file = "botocore_stubs-1.29.142-py3-none-any.whl", hash = "sha256:3dd57cee0ce1775cecc95d838614abfd76fa8f538aa8ce69184c46e47952e726"},
-    {file = "botocore_stubs-1.29.142.tar.gz", hash = "sha256:b02875475f1bb85eae134c41471c8e1ab87549e827f482dabeea27962e50dcf3"},
+    {file = "botocore_stubs-1.29.148-py3-none-any.whl", hash = "sha256:96cb761478bf428efc779d09deef5f7c3a71c0aeda2154f52acee3269c4b848f"},
+    {file = "botocore_stubs-1.29.148.tar.gz", hash = "sha256:6b537fb1a65f02a4806d7ec917c89187a493d8f0050c8944c6ae7bd07def7b3f"},
 ]
 
 [package.dependencies]
@@ -1263,14 +1263,14 @@ files = [
 
 [[package]]
 name = "types-awscrt"
-version = "0.16.18"
+version = "0.16.19"
 description = "Type annotations and code completion for awscrt"
 category = "main"
 optional = false
 python-versions = ">=3.7,<4.0"
 files = [
-    {file = "types_awscrt-0.16.18-py3-none-any.whl", hash = "sha256:a9c34dcb1c0040c626fc5a8b770edb98d4382c5a5ea326d595913878498fdc63"},
-    {file = "types_awscrt-0.16.18.tar.gz", hash = "sha256:537fb0d61f2c3d28c9c2cd7bab1cb57a7aa4fba22072391202ff4cd923b0d95e"},
+    {file = "types_awscrt-0.16.19-py3-none-any.whl", hash = "sha256:50fe7610aa40550a23d79d6167b2b8536281f038f42846eda0e520d6e3e01787"},
+    {file = "types_awscrt-0.16.19.tar.gz", hash = "sha256:763d8d543f145d51cd16ea407d079608b126941d24525e16cb1de31d949ff563"},
 ]
 
 [[package]]
@@ -1302,14 +1302,14 @@ types-awscrt = "*"
 
 [[package]]
 name = "typing-extensions"
-version = "4.6.2"
+version = "4.6.3"
 description = "Backported and Experimental Type Hints for Python 3.7+"
 category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "typing_extensions-4.6.2-py3-none-any.whl", hash = "sha256:3a8b36f13dd5fdc5d1b16fe317f5668545de77fa0b8e02006381fd49d731ab98"},
-    {file = "typing_extensions-4.6.2.tar.gz", hash = "sha256:06006244c70ac8ee83fa8282cb188f697b8db25bc8b4df07be1873c43897060c"},
+    {file = "typing_extensions-4.6.3-py3-none-any.whl", hash = "sha256:88a4153d8505aabbb4e13aacb7c486c2b4a33ca3b3f807914a9b4c844c471c26"},
+    {file = "typing_extensions-4.6.3.tar.gz", hash = "sha256:d91d5919357fe7f681a9f2b5b4cb2a5f1ef0a1e9f59c4d8ff0d3491e05c0ffd5"},
 ]
 
 [[package]]
@@ -1380,4 +1380,4 @@ test = ["covdefaults (>=2.3)", "coverage (>=7.2.3)", "coverage-enable-subprocess
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9, <3.10"
-content-hash = "c595160782812592ec1895990aa20337e36803f201d0e330c8a90b0ab309e1cf"
+content-hash = "d1400fafa2529c346ced8acceba144e3c4d97e30c542dd0a302b4bd353002b34"
