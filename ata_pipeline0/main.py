@@ -63,6 +63,8 @@ def run_pipeline(
                     FieldSnowplow.DVCE_SCREENWIDTH,
                     FieldSnowplow.EVENT_ID,
                     FieldSnowplow.EVENT_NAME,
+                    FieldSnowplow.PAGE_URL,
+                    FieldSnowplow.PAGE_URLHOST,
                     FieldSnowplow.PAGE_URLPATH,
                 }
             ),
