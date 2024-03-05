@@ -40,14 +40,20 @@ and the CI runs it on PRs.
 ### Setup
 
 1. [Install Poetry](https://python-poetry.org/docs/#installation).
-2. Run `poetry install --no-root`
-3. Make sure the virtual environment is active, then
-4. Run `pre-commit install`
+2. [Install pyenv](https://github.com/pyenv/pyenv)
+3. Install the correct Python version for this project, here Python 3.9: `pyenv install 3.9`
+4. Activate the installed Python version in the current shell: `pyenv shell 3.9`
+5. Create a virtual environment from this Python version using Poetry: `poetry env use 3.9`
+6. Activate the virtual environment: `source $(poetry env list --full-path)/bin/activate`
+7. Run `poetry install --no-root`
+8. Run  `pre-commit install` to set up `pre-commit`
 
 You're all set up! Your local environment should include all dependencies, including dev dependencies like `black`.
 This is done with Poetry via the `poetry.lock` file. As for the containerized code, that still pulls dependencies from
 `requirements.txt`. Any containerized dependency requirements need to be updated in `pyproject.toml` then exported to
 `requirements.txt`.
+
+The next times you open this directory on your IDE, make sure the virtual environment is activated (i.e., Step 6).
 
 ### Run Code Format and Linting
 
